@@ -3,9 +3,9 @@ import { Button } from "@radix-ui/themes";
 import Link from "next/link";
 const Product = () => {
   return (
-    <div>
+    <div >
       <Button>
-        <Link href="/product/new">New Product</Link>
+        <Link href="/dashboard/product/new">New Product</Link>
       </Button>
     </div>
   );

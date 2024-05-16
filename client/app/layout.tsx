@@ -20,14 +20,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.variable}>
-        <Theme accentColor="teal" grayColor="mauve">
-          <NavBar />
-          <main className="flex">
-            <Sidebar />
-            <div className="p-10">{children}</div>
-          </main>
+    <html lang="en" className={inter.variable}>
+      <body className="overscroll-none">
+        <Theme accentColor="indigo" grayColor="mauve">
+          <main>{children}</main>
           {/* <ThemePanel/> */}
         </Theme>
       </body>
