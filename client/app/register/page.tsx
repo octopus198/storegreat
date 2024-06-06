@@ -28,6 +28,7 @@ const RegisterPage = () => {
       if (!response.ok) {
         throw new Error("Failed to create user");
       }
+      console.log(response);
       const responseData = await response.json();
       console.log("User created successfully:", responseData);
     } catch (error: unknown) {
@@ -39,7 +40,7 @@ const RegisterPage = () => {
     }
   };
   return (
-      <div className="flex items-center justify-center h-full bg-indigo-500 py-10">
+      <div className="flex items-center justify-center h-screen bg-indigo-500 py-10">
         <form
           onSubmit={handleSubmit}
           className="shadow-2xl bg-white rounded-md px-20 py-14"
@@ -117,7 +118,7 @@ const RegisterPage = () => {
               </div>
             </>
             <p>
-              Have an account? <Link href="/signin">Sign in</Link>
+              Have an account? <Link className="font-medium underline" href="/login">Log in</Link>
             </p>
           </div>
         </form>

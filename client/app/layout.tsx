@@ -4,8 +4,9 @@ import "@radix-ui/themes/styles.css";
 import "./theme-config.css";
 import "./globals.css";
 import { Theme, ThemePanel } from "@radix-ui/themes";
-import NavBar from "./NavBar";
-import Sidebar from "./Sidebar";
+import NavBar from "./components/NavBar";
+import Sidebar from "./ui/dashboard/Sidebar";
+import { AppProvider } from "./AppProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -22,10 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="overscroll-none">
-        <Theme accentColor="indigo" grayColor="mauve">
-          <main>{children}</main>
-          {/* <ThemePanel/> */}
-        </Theme>
+        <AppProvider>
+          <Theme accentColor="indigo" grayColor="mauve"> 
+            <main>{children}</main>
+            {/* <ThemePanel/> */}
+          </Theme>
+        </AppProvider>
       </body>
     </html>
   );

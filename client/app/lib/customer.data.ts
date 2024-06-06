@@ -1,0 +1,122 @@
+"use client";
+import { Customer, CustomersTable } from "./definitions";
+import { unstable_noStore as noStore } from "next/cache";
+import Router, { useRouter } from "next/router";
+
+let accessToken = localStorage.getItem("accessToken");
+
+export async function fetchCustomerById(id:string) {
+  noStore();
+  try {
+    const response = await fetch(
+      `http://localhost:4000/dashboard/customer/${id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to get customer details");
+    }
+    const customerDetail = await response.json();
+    console.log(customerDetail)
+    // const productDetailData = productDetail.map((product: Product) => ({
+    //   ...product,
+    //   // Convert amount from cents to dollars
+    //   retailPrice: (product.retailPrice as number) / 100,
+    //   COGS: (product.COGS as number) / 100,
+    // }));
+    
+    return customerDetail;
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+const ITEMS_PER_PAGE = 10;
+export async function fetchFilteredCustomers(
+  query: string,
+  currentPage: number
+) {
+  noStore();
+  const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+  try {
+    if (!accessToken) {
+      console.log("we have access token here");
+      //   router.push("/login");
+      return;
+    }
+
+    const response = await fetch("http://localhost:4000/dashboard/customer", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const responseData = await response.json();
+    console.log(responseData);
+    let filteredCustomers = responseData.filter(
+      (customer: Customer) => !customer.deletedAt
+    );
+
+    filteredCustomers = filteredCustomers.sort((a: Customer, b: Customer) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());
+    console.log("Get customers successfully", responseData);
+    console.log("filtered customers", filteredCustomers);
+    // if (query) {
+    //   const queriedProducts = filteredOrders.filter((order: Order) =>
+    //     order.orderName.toLowerCase().includes(query.toLowerCase())
+    //   );
+    //   const displayedQueriedProducts = queriedProducts.slice(
+    //     skip,
+    //     skip + ITEMS_PER_PAGE
+    //   );
+    //   return displayedQueriedProducts;
+    // }
+
+    const displayedCustomers = filteredCustomers.slice(
+      skip,
+      skip + ITEMS_PER_PAGE
+    );
+    return displayedCustomers;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch customers");
+  }
+}
+
+export async function fetchCustomerItems(query: string) { // this is to fetch pages 
+  noStore();
+  try {
+    if (!accessToken) {
+      console.log("we have access token here");
+      //   router.push("/login");
+      return;
+    }
+
+    const response = await fetch("http://localhost:4000/dashboard/customer", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const responseData = await response.json();
+    console.log(responseData);
+    const filteredCustomers = responseData.filter(
+      (customer: Customer) => !customer.deletedAt
+    );
+
+    const totalItems = filteredCustomers ? filteredCustomers.length : 0;
+    return totalItems;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch total number of customers.");
+  }
+}
+
