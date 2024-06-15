@@ -41,7 +41,7 @@ class ProductService {
     if (!product) {
       throw new Error("Product not found");
     }
-    product.deletedAt = new Date();
+    product.deletedAt = new Date(); 
     await product.save();
     return product;
   }
@@ -54,7 +54,7 @@ class ProductService {
 
   // check if product already exists for the update api (check for other documents)
   async isProductNameAlreadyExistUpdate(productId, userID, productName) {
-    const product = await ProductModel.findOne({ userID, productName});
+    const product = await ProductModel.findOne({ userID, productName });
     console.log("exis", product);
     if (product) {
       if (product._id != userID) {

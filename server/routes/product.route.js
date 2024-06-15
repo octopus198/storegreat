@@ -12,9 +12,9 @@ productRoute.get("/product", authenticationValidator, getProductController);
 
 productRoute.get("/product/:id", authenticationValidator, getProductDetailController);
 
-productRoute.put("/product/:id", authenticationValidator, updateProductDetailController);
+productRoute.patch("/product/:id", authenticationValidator, updateProductDetailController);
 
-productRoute.patch("/product/:id", authenticationValidator, deleteProductController);
+productRoute.patch("/product/delete/:id", authenticationValidator, deleteProductController);
 
 productRoute.post("/product/new/isproductexists", authenticationValidator, isProductNameAlreadyExist);
 
