@@ -62,10 +62,6 @@ export async function createCustomer(
 
   const cookieStore = cookies();
   const accessToken = cookieStore.get("accessToken");
-  // const customerData = CreateCustomer.parse({
-  //   name: formData.get("name"),
-  //   image: imageUrl,
-  // });
   try {
     const response = await fetch(
       "http://localhost:4000/dashboard/customer/new",
@@ -133,53 +129,6 @@ export async function uploadImage(file: File): Promise<{ secure_url: string }> {
     throw error;
   }
 }
-
-// export async function updateProduct(id: string, formData: FormData) {
-//   const validatedFields = UpdateProduct.safeParse({
-//     productName: formData.get("productName"),
-//     brandName: formData.get("brandName"),
-//     productDescription: formData.get("description"),
-//     retailPrice: formData.get("retailPrice"),
-//     COGS: formData.get("COGS"),
-//     stockQuantity: formData.get("warehouseQuantity"),
-//     warehouse_enter_date: formData.get("warehouseEnterDate"),
-//     exp_date: formData.get("expiryDate"),
-//   });
-
-//   if (!validatedFields.success) {
-//     return {
-//       errors: validatedFields.error.flatten().fieldErrors,
-//       message: "Missing Fields. Failed to Create Invoice.",
-//     };
-//   }
-
-//   validatedFields.data.retailPrice *= 100;
-//   validatedFields.data.COGS *= 100;
-//   const productData = validatedFields.data;
-
-//   try {
-//     console.log(accessToken);
-//     const response = await fetch(
-//       `http://localhost:4000/dashboard/product/${id}`,
-//       {
-//         method: "PUT",
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `Bearer ${accessToken}`,
-//         },
-//         body: JSON.stringify(productData),
-//       }
-//     );
-//     console.log(response);
-
-//     if (!response.ok) {
-//       throw new Error("Failed to update product details");
-//     }
-//     console.log("Product updated successfully");
-//   } catch (error) {
-//     console.error("Error updating product:", error);
-//   }
-// }
 
 export async function deleteCustomer(id: string) {
   try {

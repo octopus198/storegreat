@@ -15,9 +15,6 @@ export default async function Page() {
   const products = await fetchProducts();
 
   return (
-    // <main>
-    //   <Form customers={customers} products={products}/>
-    // </main>
     <div className="w-full flex flex-col justify-center items-center">
       <div className="w-7/12 space-y-3">
         <h1 className="text-zinc-700 font-semibold text-2xl">

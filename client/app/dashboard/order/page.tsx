@@ -24,12 +24,12 @@ export default async function Order({
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
   const pageSize = 10;
-  const totalItems = await fetchOrderItems();
+  const totalItems = await fetchOrderItems(query);
 
   return (
     <div className="space-y-5 flex flex-col">
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Search placeholder="Search product..." />
+        <Search placeholder="Search order..." />
         <CreateOrder />
       </div>
       <Suspense key={query + currentPage} fallback={<ProductsTableSkeleton />}>

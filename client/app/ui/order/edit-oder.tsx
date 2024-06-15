@@ -9,10 +9,11 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button } from "@/app/ui/buttons";
 import { updateOrder } from "@/app/lib/order.actions";
-import { useFormState } from "react-dom";
+import { useFormState, useFormStatus } from "react-dom";
 import { CustomerField, ProductField } from "@/app/lib/definitions";
 import { Control, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useEffect, useState } from "react";
+import { Spinner } from "@radix-ui/themes";
 
 interface Order {
   _id: string;
@@ -20,13 +21,20 @@ interface Order {
   status: string;
   deletedAt: String;
   creation_date: Date;
-  userID: CustomerField;
+  customerId: CustomerField;
+  products: [Product];
+}
+
+interface Product {
+  variantId: string;
+  productId: string;
+  quantity: number;
 }
 
 type FormValues = {
   products: {
     variantId: string;
-    productId: string;
+    // productId: string;
     quantity: number;
   }[];
 };
@@ -71,7 +79,10 @@ export default function Form({
     formState: { errors },
   } = useForm({
     defaultValues: {
-      products: [{ variantId: "", productId: "", quantity: 0 }],
+      products: orderDetail.products.map((product) => ({
+        variantId: `${product.productId}|${product.variantId}`,
+        quantity: product.quantity,
+      })),
     },
   });
 
@@ -132,7 +143,7 @@ export default function Form({
           </label>
           <div className="relative">
             <select
-              // defaultValue={orderDetail.userID._id}
+              defaultValue={orderDetail.customerId._id || ""}
               id="customer"
               name="customerId"
               className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
@@ -151,12 +162,12 @@ export default function Form({
           </div>
         </div>
         <div id="customer-error" aria-live="polite" aria-atomic="true">
-          {/* {state.errors?.customerId &&
+          {state.errors?.customerId &&
             state.errors.customerId.map((error: string) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
-            ))} */}
+            ))}
         </div>
       </div>
 
@@ -206,7 +217,6 @@ export default function Form({
                       )
                     )}
                   </select>
-                 
                 </div>
               </label>
               <label htmlFor="">
@@ -232,9 +242,7 @@ export default function Form({
           ))}
           <Button
             type="button"
-            onClick={() =>
-              append({ variantId: "", productId: "", quantity: 0 })
-            }
+            onClick={() => append({ variantId: "", quantity: 0 })}
           >
             Add Variant
           </Button>
@@ -244,12 +252,12 @@ export default function Form({
         </p>
         <TotalQuantity control={control} />
         <div id="customer-error" aria-live="polite" aria-atomic="true">
-          {/* {state.errors?.products &&
+          {state.errors?.products &&
             state.errors.products.map((error: string) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
-            ))} */}
+            ))}
         </div>
       </div>
       <input type="hidden" value={totalAmount} id="amount" name="amount" />
@@ -273,6 +281,7 @@ export default function Form({
                     name="status"
                     type="radio"
                     value="pending"
+                    defaultChecked={orderDetail.status === 'pending'}
                     className="text-white-600 h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 focus:ring-2"
                   />
                   <label
@@ -288,6 +297,7 @@ export default function Form({
                     name="status"
                     type="radio"
                     value="paid"
+                    defaultChecked={orderDetail.status === 'paid'}
                     className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                   />
                   <label
@@ -300,12 +310,12 @@ export default function Form({
               </div>
             </div>
             <div id="status-error" aria-live="polite" aria-atomic="true">
-              {/* {state.errors?.status &&
+              {state.errors?.status &&
                 state.errors.status.map((error: string) => (
                   <p className="mt-2 text-sm text-red-500" key={error}>
                     {error}
                   </p>
-                ))} */}
+                ))}
             </div>
           </fieldset>
         </div>
@@ -317,8 +327,21 @@ export default function Form({
         >
           Cancel
         </Link>
-        <Button type="submit">Create Order</Button>
+        <UpdateOrderButton/>
       </div>
     </form>
+  );
+}
+
+function UpdateOrderButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      className="bg-indigo-600 hover:bg-indigo-400"
+      aria-disabled={pending}
+    >
+      {pending? <Spinner />: " "} Update Order
+    </Button>
   );
 }

@@ -272,7 +272,7 @@ export async function deleteOrder(id: string) {
     }
 
     console.log(response);
-    // revalidatePath("/dashboard/order");
+    revalidatePath("/dashboard/order");
   } catch (error) {
     console.error("Error deleting order:", error);
   }

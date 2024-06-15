@@ -80,11 +80,9 @@ export default async function ProductTable({
           <Table.Row>
             <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Product Name</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Retail Price</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Cost of Goods Sold</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Stock Quantity</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Stock value</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Action</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Actions</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -109,8 +107,6 @@ export default async function ProductTable({
                   {product.productName}
                 </Link>
               </Table.Cell>
-              <Table.Cell>{formatWithCommas(product.retailPrice)}</Table.Cell>
-              <Table.Cell>{formatWithCommas(product.COGS)}</Table.Cell>
               <Table.Cell
                 style={{
                   color:
@@ -123,8 +119,8 @@ export default async function ProductTable({
                 {product.hasVariants ? (
                   <div className="flex items-center">
                     <span style={{ marginRight: 5 }}>{getTotalStock(product)}</span>
-                    {(product.hasVariants && getTotalStock(product) < 10) ||
-                    (!product.hasVariants && product.stockQuantity < 10) ? (
+                    {(product.hasVariants && getTotalStock(product) <= CONSTANTS.LOWSTOCK_THRESHOLD) ||
+                    (!product.hasVariants && product.stockQuantity <= CONSTANTS.LOWSTOCK_THRESHOLD) ? (
                       <ArrowTrendingDownIcon className="w-5 text-red-500 mr-1" />
                     ) : null}
                     in {getTotalVariants(product)} variants

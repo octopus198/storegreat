@@ -1,10 +1,11 @@
 "use client";
-import { TextField } from "@radix-ui/themes";
+import { Spinner, TextField } from "@radix-ui/themes";
 import { Button } from "../buttons";
 import Link from "next/link";
 import { useState, ChangeEvent } from "react";
 import { createCustomer } from "@/app/lib/customer.actions";
-import { useFormState } from "react-dom";
+import { useFormState, useFormStatus } from "react-dom";
+import { Spinnaker } from "next/font/google";
 
 export default function Form() {
   const initialState = { message: null, errors: {} };
@@ -96,31 +97,21 @@ export default function Form() {
         >
           Cancel
         </Link>
-        <Button type="submit">Create Customer</Button>
+        <CreateCustomerButton/>
       </div>
     </form>
   );
 }
 
-{
-  /* STYLED IMAGE UPLOAD */
-}
+function CreateCustomerButton() {
+  const { pending } = useFormStatus();
 
-{
-  /* <div className="flex items-center justify-center w-full h-32 rounded-md hover:bg-zinc-100 border-dotted border-2 border-zinc-200">
-            <Button type="button" onClick={handleUploadButtonClick}>
-              Upload image
-            </Button>
-            <input
-              type="file"
-              id="imageInput"
-              name="file"
-              ref={fileInputRef}
-              onChange={handleImageUpload}
-              accept="image/*"
-              className="hidden"
-            />
-          </div>
-        </div>
-      </div> */
+  return (
+    <Button
+      className="bg-indigo-600 hover:bg-indigo-400"
+      aria-disabled={pending}
+    >
+      {pending? <Spinner />: " "} Create Customer
+    </Button>
+  );
 }

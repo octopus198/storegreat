@@ -29,7 +29,7 @@ export default async function Customer({
   return (
     <div className="space-y-5 flex flex-col">
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Search placeholder="Search product..." />
+        <Search placeholder="Search customer..." />
         <CreateCustomer />
       </div>
       <Suspense key={query + currentPage} fallback={<ProductsTableSkeleton />}>

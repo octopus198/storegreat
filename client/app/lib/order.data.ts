@@ -1,8 +1,22 @@
 "use server";
-import { Order, OrdersTable } from "./definitions";
+// import { Order, OrdersTable } from "./definitions";
 import { unstable_noStore as noStore } from "next/cache";
 import Router, { useRouter } from "next/router";
 import { cookies } from 'next/headers'
+
+ type Order = {
+  _id: string;
+  customerId: Customer;
+  amount: number;
+  status: string;
+  deletedAt: String;
+  creation_date: Date;
+};
+
+type Customer = {
+  name: string;
+  _id: string;
+}
 
 export async function fetchOrderById(id:string) {
   noStore();
@@ -25,12 +39,6 @@ export async function fetchOrderById(id:string) {
     }
     const orderDetail = await response.json();
     console.log(orderDetail)
-    // const productDetailData = productDetail.map((product: Product) => ({
-    //   ...product,
-    //   // Convert amount from cents to dollars
-    //   retailPrice: (product.retailPrice as number) / 100,
-    //   COGS: (product.COGS as number) / 100,
-    // }));
     
     return orderDetail;
   } catch (err) {
@@ -48,17 +56,12 @@ export async function fetchFilteredOrders(
   const accessToken = cookieStore.get('accessToken')
   const skip = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
-    if (!accessToken) {
-      console.log("we have access token here");
-      //   router.push("/login");
-      return;
-    }
-
+    console.log("what's wrong?")
     const response = await fetch("http://localhost:4000/dashboard/order", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken.value}`,
+        Authorization: `Bearer ${accessToken?.value}`,
       },
     });
 
@@ -70,21 +73,16 @@ export async function fetchFilteredOrders(
 
     filteredOrders = filteredOrders.sort((a: Order, b: Order) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());
 
-    console.log("Get orders successfully", responseData);
-    console.log("filtered orders", filteredOrders);
-    // filteredOrders.forEach((order: Order, index: number) => {
-    //   console.log(`Order ${index + 1}:`, order.products);
-    // });
-    // if (query) {
-    //   const queriedProducts = filteredOrders.filter((order: Order) =>
-    //     order.orderName.toLowerCase().includes(query.toLowerCase())
-    //   );
-    //   const displayedQueriedProducts = queriedProducts.slice(
-    //     skip,
-    //     skip + ITEMS_PER_PAGE
-    //   );
-    //   return displayedQueriedProducts;
-    // }
+    if (query) {
+      const queriedOrders = filteredOrders.filter((order: Order) =>
+        order.customerId.name.toLowerCase().includes(query.toLowerCase())
+      );
+      const displayedQueriedOrders = queriedOrders.slice(
+        skip,
+        skip + ITEMS_PER_PAGE
+      );
+      return displayedQueriedOrders;
+    }
 
     const displayedOrders = filteredOrders.slice(
       skip,
@@ -97,22 +95,16 @@ export async function fetchFilteredOrders(
   }
 }
 
-export async function fetchOrderItems() {
+export async function fetchOrderItems(query: string) {
   noStore();
   const cookieStore = cookies()
   const accessToken = cookieStore.get('accessToken')
   try {
-    if (!accessToken) {
-      console.log("we have access token here");
-      //   router.push("/login");
-      return;
-    }
-
     const response = await fetch("http://localhost:4000/dashboard/order", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken.value}`,
+        Authorization: `Bearer ${accessToken?.value}`,
       },
     });
     const responseData = await response.json();

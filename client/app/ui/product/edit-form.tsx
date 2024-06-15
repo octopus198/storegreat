@@ -1,10 +1,11 @@
 "use client";
-import { TextField, TextArea, Grid, Box } from "@radix-ui/themes";
-import { useFormState } from "react-dom";
+import { TextField, TextArea, Grid, Box, Spinner } from "@radix-ui/themes";
+import { useFormState, useFormStatus } from "react-dom";
 import { Button } from "../buttons";
 import Link from "next/link";
 import { createProduct, updateProduct } from "@/app/lib/actions";
 import { useWatch, Control, useForm, useFieldArray } from "react-hook-form";
+import { useState } from "react";
 
 interface Product {
   _id: string;
@@ -80,10 +81,6 @@ export default function Form({ productDetail }: { productDetail: Product }) {
     control,
   });
 
-  // const handleUpdate = (index: number, field: keyof Variant, value: any) => {
-  //   setValue(`variants.${index}.${field}`, value, { shouldDirty: true });
-  // };
-
   return (
     <form action={dispatch} className="space-y-5">
       <div className=" bg-white px-10 py-10 rounded-lg shadow-md space-y-4">
@@ -118,8 +115,8 @@ export default function Form({ productDetail }: { productDetail: Product }) {
             Brand name
           </label>
           <TextField.Root
-            id="brandName"
-            name="brandName"
+            id="brand"
+            name="brand"
             placeholder="Brand name"
             defaultValue={productDetail.brand}
           ></TextField.Root>
@@ -133,8 +130,8 @@ export default function Form({ productDetail }: { productDetail: Product }) {
             Description
           </label>
           <TextArea
-            id="description"
-            name="description"
+            id="productDescription"
+            name="productDescription"
             rows={10}
             placeholder="Product Description"
             defaultValue={productDetail.productDescription}
@@ -204,7 +201,6 @@ export default function Form({ productDetail }: { productDetail: Product }) {
                     required: true,
                     valueAsNumber: true,
                   })}
-                  
                   className="block w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-inset focus:ring-indigo-600"
                 />
               </label>
@@ -249,6 +245,7 @@ export default function Form({ productDetail }: { productDetail: Product }) {
           >
             Product Image
           </label>
+          
           <div className="flex space-x-4 overflow-x-auto">
             {productDetail.imageURL &&
               productDetail.imageURL.map((url, index) => (
@@ -274,8 +271,8 @@ export default function Form({ productDetail }: { productDetail: Product }) {
           </label>
           <input
             defaultValue={productDetail.stockQuantity}
-            id="warehouseQuantity"
-            name="warehouseQuantity"
+            id="stockQuantity"
+            name="stockQuantity"
             type="number"
             className="block border-solid border-indigo-600 w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           />
@@ -312,22 +309,7 @@ export default function Form({ productDetail }: { productDetail: Product }) {
           />
         </div>
       </div>
-      <div className="bg-white px-10 py-10 rounded-lg shadow-md space-y-4">
-        <div className="space-y-2">
-          <label
-            htmlFor="variants"
-            className="block text-zinc-700 font-semibold text-normal"
-          >
-            Variants
-          </label>
-          <input
-            id="variants"
-            name="variants"
-            type="text"
-            className="block border-solid border-indigo-600 w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-          />
-        </div>
-      </div>
+
       <div className="bg-white px-10 py-10 rounded-lg shadow-md space-y-4">
         <div className="space-y-2">
           <label
@@ -342,8 +324,8 @@ export default function Form({ productDetail }: { productDetail: Product }) {
                 .toISOString()
                 .split("T")[0]
             }
-            id="warehouseEnterDate"
-            name="warehouseEnterDate"
+            id="warehouse_enter_date"
+            name="warehouse_enter_date"
             type="date"
             className="block border-solid border-indigo-600 w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           />
@@ -359,8 +341,8 @@ export default function Form({ productDetail }: { productDetail: Product }) {
             defaultValue={
               new Date(productDetail.exp_date).toISOString().split("T")[0]
             }
-            id="expiryDate"
-            name="expiryDate"
+            id="exp_date"
+            name="exp_date"
             type="date"
             className="block border-solid border-indigo-600 w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           />
@@ -373,8 +355,21 @@ export default function Form({ productDetail }: { productDetail: Product }) {
         >
           Cancel
         </Link>
-        <Button type="submit">Update Product</Button>
+        <UpdateProductButton/>
       </div>
     </form>
+  );
+}
+
+function UpdateProductButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      className="bg-indigo-600 hover:bg-indigo-400"
+      aria-disabled={pending}
+    >
+      {pending? <Spinner />: " "} Update Product
+    </Button>
   );
 }

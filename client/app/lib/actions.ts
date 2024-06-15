@@ -22,7 +22,11 @@ const FormSchema = z.object({
   brand: z.string().optional().nullable(),
   imageURL: z.array(z.string()).optional().nullable(),
   productDescription: z.string().optional().nullable(),
-  stockQuantity: z.coerce.number().optional().nullable(),
+  stockQuantity: z.coerce
+    .number()
+    .gte(0, { message: "Please enter amount greater than 0" })
+    .optional()
+    .nullable(),
   retailPrice: z.coerce
     .number()
     .gte(0, { message: "Please enter amount greater than 0" })
@@ -65,7 +69,11 @@ const FormUpdateSchema = z.object({
   brand: z.string().optional().nullable(),
   imageURL: z.array(z.string()).optional().nullable(),
   productDescription: z.string().optional().nullable(),
-  stockQuantity: z.coerce.number().optional().nullable(),
+  stockQuantity: z.coerce
+    .number()
+    .gte(0, { message: "Please enter amount greater than 0" })
+    .optional()
+    .nullable(),
   retailPrice: z.coerce
     .number()
     .gte(0, { message: "Please enter amount greater than 0" })
@@ -110,7 +118,6 @@ const CreateProduct = FormSchema.omit({
   deletedAt: true,
   creation_date: true,
 });
-
 
 export type State = {
   errors?: {
@@ -161,7 +168,6 @@ async function checkProductNameExists(productName: string): Promise<boolean> {
   }
 }
 
-
 export async function createProduct(
   prevState: State,
   formData: FormData
@@ -171,7 +177,7 @@ export async function createProduct(
   const imageFiles = formData.getAll("image") as File[];
   console.log(" imageFiles", imageFiles);
   const validImageFiles = imageFiles.filter((file) => file.size > 0);
-  
+
   console.log("valid imageFiles", validImageFiles);
   console.log("imageFiles length", imageFiles.length);
   if (validImageFiles.length !== 0) {
@@ -193,7 +199,12 @@ export async function createProduct(
       const field = parseInt(index);
       const prop = key.replace(`variants.${field}.`, "");
       if (!variantsData[field]) {
-        variantsData[field] = { variantName: "", variantPrice: "", variantQuantity: "", variantCOGS: "" };
+        variantsData[field] = {
+          variantName: "",
+          variantPrice: "",
+          variantQuantity: "",
+          variantCOGS: "",
+        };
       }
       if (
         prop === "variantName" ||
@@ -271,8 +282,7 @@ export async function createProduct(
       console.error("Unknown error:", error);
       return { message: "An unknown error occurred" };
     }
-  } 
-  finally {
+  } finally {
     if (isValidationSuccess) {
       revalidatePath("/dashboard/product");
       redirect("/dashboard/product");
@@ -336,24 +346,24 @@ export async function updateProduct(
   console.log("imageFiles in update", imageFiles);
 
   const variantsData: {
-    name: string;
-    price: string;
-    quantity: string;
-    COGS: string;
+    variantName: string;
+    variantPrice: string;
+    variantQuantity: string;
+    variantCOGS: string;
   }[] = [];
   for (const [key, value] of formData.entries()) {
-    if (key.startsWith("variant")) {
-      const index = key.replace("variant.", "");
+    if (key.startsWith("variants")) {
+      const index = key.replace("variants.", "");
       const field = parseInt(index);
-      const prop = key.replace(`variant.${field}.`, "");
+      const prop = key.replace(`variants.${field}.`, "");
       if (!variantsData[field]) {
-        variantsData[field] = { name: "", price: "", quantity: "", COGS: "" };
+        variantsData[field] = { variantName: "", variantPrice: "", variantQuantity: "", variantCOGS: "" };
       }
       if (
-        prop === "name" ||
-        prop === "price" ||
-        prop === "quantity" ||
-        prop === "COGS"
+        prop === "variantName" ||
+        prop === "variantPrice" ||
+        prop === "variantQuantity" ||
+        prop === "variantCOGS"
       ) {
         variantsData[field][prop] = value.toString();
       }
@@ -362,10 +372,10 @@ export async function updateProduct(
   console.log("variants data in update", variantsData);
 
   const variants = variantsData.map((variant) => ({
-    variantName: variant.name,
-    variantPrice: parseFloat(variant.price),
-    variantQuantity: parseInt(variant.quantity || "0"),
-    variantCOGS: parseFloat(variant.COGS),
+    variantName: variant.variantName,
+    variantPrice: parseFloat(variant.variantPrice),
+    variantQuantity: parseInt(variant.variantQuantity || "0"),
+    variantCOGS: parseFloat(variant.variantCOGS),
   }));
 
   console.log("variants in update", variants);
@@ -375,7 +385,6 @@ export async function updateProduct(
     const validatedFields = await UpdateProduct.parseAsync({
       productName: formData.get("productName"),
       brand: formData.get("brand"),
-      imageURL: imageFiles,
       productDescription: formData.get("productDescription"),
       stockQuantity: formData.get("stockQuantity"),
       retailPrice: formData.get("retailPrice"),
@@ -397,7 +406,7 @@ export async function updateProduct(
     const response = await fetch(
       `http://localhost:4000/dashboard/product/${id}`,
       {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken?.value}`,
@@ -434,43 +443,6 @@ export async function updateProduct(
       redirect("/dashboard/product");
     }
   }
-  // const productData = UpdateProduct.parse({
-  //   productName: formData.get("productName") ?? "",
-  //   brand: formData.get("brand") ?? "",
-  //   imageURL: formData.getAll("image") as File[],
-  //   productDescription: formData.get("productDescription") ?? "",
-  //   stockQuantity: formData.get("stockQuantity") ?? "",
-  //   retailPrice: formData.get("retailPrice") ?? "",
-  //   COGS: formData.get("COGS") ?? "",
-  //   variants: formData.get("variants") ?? "",
-  //   warehouse_enter_date: formData.get("warehouse_enter_date") ?? "",
-  //   exp_date: formData.get("exp_date") ?? "",
-  // });
-
-  // // get access token
-  // const cookieStore = cookies();
-  // const accessToken = cookieStore.get("accessToken");
-  // try {
-  //   const response = await fetch(
-  //     `http://localhost:4000/dashboard/product/${id}`,
-  //     {
-  //       method: "PUT",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${accessToken?.value}`,
-  //       },
-  //       body: JSON.stringify(productData),
-  //     }
-  //   );
-  //   console.log(response);
-
-  //   if (!response.ok) {
-  //     throw new Error("Failed to update product details");
-  //   }
-  //   console.log("Product updated successfully");
-  // } catch (error) {
-  //   console.error("Error updating product:", error);
-  // }
 }
 
 // delete product
@@ -480,7 +452,7 @@ export async function deleteProduct(id: string) {
   const accessToken = cookieStore.get("accessToken");
   try {
     const response = await fetch(
-      `http://localhost:4000/dashboard/product/${id}`,
+      `http://localhost:4000/dashboard/product/delete/${id}`,
       {
         method: "PATCH",
         headers: {
@@ -491,10 +463,10 @@ export async function deleteProduct(id: string) {
     );
 
     if (!response.ok) {
-      throw new Error("Faile to delete product");
+      throw new Error("Fail to delete product");
     }
 
-    console.log(response);
+    console.log("the delete product response is",response);
     revalidatePath("/dashboard/product");
   } catch (error) {
     console.error("Error deleting product:", error);

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useForm, useFieldArray, useWatch, Control } from "react-hook-form";
 import { CustomerField, ProductField } from "@/app/lib/definitions";
 import Link from "next/link";
-import { useFormState } from "react-dom";
+import { useFormState, useFormStatus } from "react-dom";
 import {
   CheckIcon,
   ClockIcon,
@@ -11,6 +11,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button } from "@/app/ui/buttons";
 import { createOrder } from "@/app/lib/order.actions";
+import { Spinnaker } from "next/font/google";
+import { Spinner } from "@radix-ui/themes";
 
 type FormValues = {
   product: {
@@ -311,9 +313,22 @@ export default function Form({
         >
           Cancel
         </Link>
-        <Button type="submit">Create Order</Button>
+        <CreateOrderButton/>
       </div>
     </form>
+  );
+}
+
+function CreateOrderButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      className="bg-indigo-600 hover:bg-indigo-400"
+      aria-disabled={pending}
+    >
+      {pending? <Spinner />: " "} Create Order
+    </Button>
   );
 }
 

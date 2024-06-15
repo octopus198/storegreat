@@ -16,7 +16,6 @@ export async function login(formData: FormData) {
     if (!response.ok) {
       throw new Error("Faile to login");
     }
-
     const responseData = await response.json();
 
     cookies().set({

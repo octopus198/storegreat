@@ -26,13 +26,6 @@ export async function fetchCustomerById(id:string) {
     }
     const customerDetail = await response.json();
     console.log(customerDetail)
-    // const productDetailData = productDetail.map((product: Product) => ({
-    //   ...product,
-    //   // Convert amount from cents to dollars
-    //   retailPrice: (product.retailPrice as number) / 100,
-    //   COGS: (product.COGS as number) / 100,
-    // }));
-    
     return customerDetail;
   } catch (err) {
     console.log(err);
@@ -66,16 +59,16 @@ export async function fetchFilteredCustomers(
     filteredCustomers = filteredCustomers.sort((a: Customer, b: Customer) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());
     console.log("Get customers successfully", responseData);
     console.log("filtered customers", filteredCustomers);
-    // if (query) {
-    //   const queriedProducts = filteredOrders.filter((order: Order) =>
-    //     order.orderName.toLowerCase().includes(query.toLowerCase())
-    //   );
-    //   const displayedQueriedProducts = queriedProducts.slice(
-    //     skip,
-    //     skip + ITEMS_PER_PAGE
-    //   );
-    //   return displayedQueriedProducts;
-    // }
+    if (query) {
+      const queriedProducts = filteredCustomers.filter((customer: Customer) =>
+        customer.name.toLowerCase().includes(query.toLowerCase())
+      );
+      const displayedQueriedProducts = queriedProducts.slice(
+        skip,
+        skip + ITEMS_PER_PAGE
+      );
+      return displayedQueriedProducts;
+    }
 
     const displayedCustomers = filteredCustomers.slice(
       skip,
