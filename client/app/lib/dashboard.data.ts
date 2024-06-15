@@ -3,8 +3,7 @@ import { formatCurrency } from "./utils";
 import { unstable_noStore as noStore } from "next/cache";
 import { cookies } from "next/headers";
 import { Order, OrdersTable } from "./definitions";
-import { customFetch } from "./handler";
-
+// import { customFetch } from "../api/route";
 
 export async function fetchCardData() {
   noStore();
@@ -161,7 +160,7 @@ export async function fetchUser() {
   const cookieStore = cookies();
   const accessToken = cookieStore.get("accessToken");
   try {
-    const response = await customFetch("http://localhost:4000/getme", {
+    const response = await fetch("http://localhost:4000/getme", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

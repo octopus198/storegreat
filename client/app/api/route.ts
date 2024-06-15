@@ -59,7 +59,6 @@ export async function customFetch(url: string, options: FetchOptions = {}) {
         value: responseData.tokens.refresh_token,
         httpOnly: true,
       });
-      
       console.log("message 3 works")
 
       accessToken = cookieStore.get("accessToken")?.value;

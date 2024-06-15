@@ -23,8 +23,10 @@ import { login } from "../lib/auth.actions";
 import { Spinner } from "@radix-ui/themes";
 
 export default function LoginForm() {
+  const initialState = { message: null, errors: {} };
+  const [state, dispatch] = useFormState(login, initialState);
   return (
-    <form action={login}>
+    <form action={dispatch}>
       <Card className="mx-auto max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
@@ -44,6 +46,14 @@ export default function LoginForm() {
                 required
               />
             </div>
+            <div id="customer-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.email &&
+                state.errors.email.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
+            </div>
             <div className="grid gap-2">
               <div className="flex items-center">
                 <Label htmlFor="password">Password</Label>
@@ -55,6 +65,15 @@ export default function LoginForm() {
                 </Link>
               </div>
               <Input id="password" name="password" type="password" required />
+            </div>
+
+            <div id="customer-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.password &&
+                state.errors.password.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
             </div>
             <LoginButton />
             {/* <div
