@@ -1,42 +1,127 @@
 "use server";
-
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { useRouter } from "next/router";
-
-let accessToken = localStorage.getItem("accessToken");
+import { cookies } from "next/headers";
 
 const FormSchema = z.object({
   _id: z.string(),
-  productName: z.string({
-    required_error: "Product name is required",
-  }),
-  brand: z.string(),
-  productDescription: z.string(),
-  stockQuantity: z.coerce.number(),
+  productName: z
+    .string()
+    .trim()
+    .min(1, { message: "Product name is required" })
+    .refine(
+      async (productName) => {
+        const exists = await checkProductNameExists(productName);
+        return !exists;
+      },
+      {
+        message: "Product name already exists",
+      }
+    ),
+  brand: z.string().optional().nullable(),
+  imageURL: z.array(z.string()).optional().nullable(),
+  productDescription: z.string().optional().nullable(),
+  stockQuantity: z.coerce.number().optional().nullable(),
   retailPrice: z.coerce
     .number()
-    .gt(0, { message: "Please enter amount greater than 0" }),
+    .gte(0, { message: "Please enter amount greater than 0" })
+    .optional()
+    .nullable(),
   COGS: z.coerce
     .number()
-    .gt(0, { message: "Please enter amount greater than 0" }),
-  variants: z.string(),
-  warehouse_enter_date: z.string(),
-  exp_date: z.string(),
+    .gte(0, { message: "Please enter amount greater than 0" })
+    .optional()
+    .nullable(),
+  hasVariants: z.boolean(),
+  variants: z
+    .array(
+      z.object({
+        variantName: z.string(),
+        variantPrice: z.coerce
+          .number()
+          .gt(0, { message: "Please enter price greater than 0" }),
+        variantQuantity: z.coerce
+          .number()
+          .gt(0, { message: "Please enter quantity greater than 0" }),
+        variantCOGS: z.coerce
+          .number()
+          .gt(0, { message: "Please enter cost greater than 0" }),
+      })
+    )
+    .optional(),
+  warehouse_enter_date: z.string().optional().nullable(),
+  exp_date: z.string().optional().nullable(),
+  deletedAt: z.string(),
+  creation_date: z.string(),
 });
 
-const CreateProduct = FormSchema.omit({ _id: true });
-const UpdateProduct = FormSchema.omit({ _id: true });
+const FormUpdateSchema = z.object({
+  _id: z.string(),
+  productName: z
+    .string()
+    .trim()
+    .min(1, { message: "Product name is required" }),
+  brand: z.string().optional().nullable(),
+  imageURL: z.array(z.string()).optional().nullable(),
+  productDescription: z.string().optional().nullable(),
+  stockQuantity: z.coerce.number().optional().nullable(),
+  retailPrice: z.coerce
+    .number()
+    .gte(0, { message: "Please enter amount greater than 0" })
+    .optional()
+    .nullable(),
+  COGS: z.coerce
+    .number()
+    .gte(0, { message: "Please enter amount greater than 0" })
+    .optional()
+    .nullable(),
+  hasVariants: z.boolean(),
+  variants: z
+    .array(
+      z.object({
+        variantName: z.string(),
+        variantPrice: z.coerce
+          .number()
+          .gt(0, { message: "Please enter price greater than 0" }),
+        variantQuantity: z.coerce
+          .number()
+          .gt(0, { message: "Please enter quantity greater than 0" }),
+        variantCOGS: z.coerce
+          .number()
+          .gt(0, { message: "Please enter cost greater than 0" }),
+      })
+    )
+    .optional(),
+  warehouse_enter_date: z.string().optional().nullable(),
+  exp_date: z.string().optional().nullable(),
+  deletedAt: z.string(),
+  creation_date: z.string(),
+});
+
+const UpdateProduct = FormUpdateSchema.omit({
+  _id: true,
+  deletedAt: true,
+  creation_date: true,
+});
+
+const CreateProduct = FormSchema.omit({
+  _id: true,
+  deletedAt: true,
+  creation_date: true,
+});
+
 
 export type State = {
   errors?: {
     productName?: string[];
     brand?: string[];
+    imageURL?: string[];
     productDescription?: string[];
     stockQuantity?: string[];
     retailPrice?: string[];
     COGS?: string[];
+    hasVariants?: string[];
     variants?: string[];
     warehouse_enter_date?: string[];
     exp_date?: string[];
@@ -44,119 +129,355 @@ export type State = {
   message?: string | null;
 };
 
-export async function createProduct(prevState: State, formData: FormData) {
-  const validatedFields = CreateProduct.safeParse({
-    productName: formData.get("productName"),
-    brand: formData.get("brand"),
-    productDescription: formData.get("productDescription"),
-    stockQuantity: formData.get("stockQuantity"),
-    retailPrice: formData.get("retailPrice"),
-    COGS: formData.get("COGS"),
-    variants: formData.get("variants"),
-    warehouse_enter_date: formData.get("warehouse_enter_date"),
-    exp_date: formData.get("exp_date"),
-  });
+async function checkProductNameExists(productName: string): Promise<boolean> {
+  try {
+    const cookieStore = cookies();
+    const accessToken = cookieStore.get("accessToken");
+    const response = await fetch(
+      "http://localhost:4000/dashboard/product/new/isproductexists",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken?.value}`,
+        },
+        body: JSON.stringify({ productName }), // Ensure productName is sent as an object
+      }
+    );
+    console.log("the responses is ", response);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error); // Throw an error with the error message from the server
+    }
 
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: "Missing Fields. Failed to Create Product.",
-    };
+    const data: { exists: boolean } = await response.json();
+    return data.exists;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message || "Failed to check product name");
+    } else {
+      throw new Error("Failed to check product name");
+    }
+  }
+}
+
+
+export async function createProduct(
+  prevState: State,
+  formData: FormData
+): Promise<State> {
+  // get images
+  let imageUrls: string[] = [];
+  const imageFiles = formData.getAll("image") as File[];
+  console.log(" imageFiles", imageFiles);
+  const validImageFiles = imageFiles.filter((file) => file.size > 0);
+  
+  console.log("valid imageFiles", validImageFiles);
+  console.log("imageFiles length", imageFiles.length);
+  if (validImageFiles.length !== 0) {
+    const uploadResponse = await uploadImage(imageFiles);
+    imageUrls = uploadResponse.files.map((file) => file.secure_url);
+  }
+  console.log(imageUrls);
+
+  // get variants data
+  const variantsData: {
+    variantName: string;
+    variantPrice: string;
+    variantQuantity: string;
+    variantCOGS: string;
+  }[] = [];
+  for (const [key, value] of formData.entries()) {
+    if (key.startsWith("variants")) {
+      const index = key.replace("variants.", "");
+      const field = parseInt(index);
+      const prop = key.replace(`variants.${field}.`, "");
+      if (!variantsData[field]) {
+        variantsData[field] = { variantName: "", variantPrice: "", variantQuantity: "", variantCOGS: "" };
+      }
+      if (
+        prop === "variantName" ||
+        prop === "variantPrice" ||
+        prop === "variantQuantity" ||
+        prop === "variantCOGS"
+      ) {
+        variantsData[field][prop] = value.toString();
+      }
+    }
   }
 
-  validatedFields.data.retailPrice *= 100;
-  validatedFields.data.COGS *= 100;
-  const productData = validatedFields.data;
+  const variants = variantsData.map((variant) => ({
+    variantName: variant.variantName,
+    variantPrice: parseFloat(variant.variantPrice),
+    variantQuantity: parseInt(variant.variantQuantity || "0"),
+    variantCOGS: parseFloat(variant.variantCOGS),
+  }));
 
+  let isValidationSuccess = false;
   try {
+    const validatedFields = await CreateProduct.parseAsync({
+      productName: formData.get("productName"),
+      brand: formData.get("brand"),
+      imageURL: imageUrls,
+      productDescription: formData.get("productDescription"),
+      stockQuantity: formData.get("stockQuantity"),
+      retailPrice: formData.get("retailPrice"),
+      COGS: formData.get("COGS"),
+      variants: variants,
+      hasVariants: variants.length > 0 ? true : false,
+      warehouse_enter_date: formData.get("warehouse_enter_date"),
+      exp_date: formData.get("exp_date"),
+    });
+
+    isValidationSuccess = true;
+    console.log("Parsing success");
+
+    // get access token
+    const cookieStore = cookies();
+    const accessToken = cookieStore.get("accessToken");
+
+    // Perform API call to create product
     const response = await fetch(
       "http://localhost:4000/dashboard/product/new",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken?.value}`,
         },
-        body: JSON.stringify(productData),
+        body: JSON.stringify(validatedFields),
       }
     );
-    console.log(response);
 
     if (!response.ok) {
-      throw new Error("Faile to upload new products");
+      throw new Error("Failed to create product");
     }
 
     const responseData = await response.json();
-    console.log(responseData);
-    if (!responseData || !responseData.product || !responseData.product._id) {
-      throw new Error(
-        "No response data or no responseData.product or no responseData.product._id"
-      );
-    }
     console.log("Product created successfully", responseData);
-    
-    // revalidatePath('/dashboard/product');
-    // redirect('/dashboard/product');
+
+    return { message: "Product created successfully" };
   } catch (error) {
-    // if (error instanceof Error) {
-    //   console.error("Error creating product:", error.message);
-    // } else {
-    //   console.error("Unknown error:", error);
-    // }
-    return {
-      message: 'Database Error: Failed to Create Product.'
-    };
+    if (error instanceof z.ZodError) {
+      console.error("Validation failed:", error.flatten().fieldErrors);
+      return {
+        errors: error.flatten().fieldErrors,
+        message: "Validation failed. Failed to create product.",
+      };
+    } else if (error instanceof Error) {
+      console.error("Failed to create product:", error.message);
+      return { message: error.message || "Failed to create product" };
+    } else {
+      console.error("Unknown error:", error);
+      return { message: "An unknown error occurred" };
+    }
+  } 
+  finally {
+    if (isValidationSuccess) {
+      revalidatePath("/dashboard/product");
+      redirect("/dashboard/product");
+    }
   }
 }
 
-export async function updateProduct(id: string, formData: FormData) {
-  const validatedFields = UpdateProduct.safeParse({
-    productName: formData.get("productName"),
-    brandName: formData.get("brandName"),
-    productDescription: formData.get("description"),
-    retailPrice: formData.get("retailPrice"),
-    COGS: formData.get("COGS"),
-    stockQuantity: formData.get("warehouseQuantity"),
-    warehouse_enter_date: formData.get("warehouseEnterDate"),
-    exp_date: formData.get("expiryDate"),
-  });
+// Upload images onto cloudinary
+interface UploadResponse {
+  files: {
+    secure_url: string;
+  }[];
+}
 
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: "Missing Fields. Failed to Create Invoice.",
-    };
-  }
+export async function uploadImage(files: File[]): Promise<UploadResponse> {
+  // console.log(files);
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+  // console.log(formData);
 
-  validatedFields.data.retailPrice *= 100;
-  validatedFields.data.COGS *= 100;
-  const productData = validatedFields.data;
+  // get access token
+  const cookieStore = cookies();
+  const accessToken = cookieStore.get("accessToken");
 
   try {
-    console.log(accessToken);
+    const response = await fetch(
+      "http://localhost:4000/dashboard/product/new/upload",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken?.value}`,
+        },
+        body: formData,
+      }
+    );
+    // console.log("it work!!!");
+    // console.log(response);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to upload image: ${response.status} - ${response.statusText}`
+      );
+    }
+    const data = await response.json();
+
+    return data;
+  } catch (error) {
+    console.error("Error uploading images:", error);
+    throw error;
+  }
+}
+
+// update product
+export async function updateProduct(
+  id: string,
+  prevState: State,
+  formData: FormData
+): Promise<State> {
+  // get images
+  const imageFiles = formData.getAll("image") as File[];
+  console.log("imageFiles in update", imageFiles);
+
+  const variantsData: {
+    name: string;
+    price: string;
+    quantity: string;
+    COGS: string;
+  }[] = [];
+  for (const [key, value] of formData.entries()) {
+    if (key.startsWith("variant")) {
+      const index = key.replace("variant.", "");
+      const field = parseInt(index);
+      const prop = key.replace(`variant.${field}.`, "");
+      if (!variantsData[field]) {
+        variantsData[field] = { name: "", price: "", quantity: "", COGS: "" };
+      }
+      if (
+        prop === "name" ||
+        prop === "price" ||
+        prop === "quantity" ||
+        prop === "COGS"
+      ) {
+        variantsData[field][prop] = value.toString();
+      }
+    }
+  }
+  console.log("variants data in update", variantsData);
+
+  const variants = variantsData.map((variant) => ({
+    variantName: variant.name,
+    variantPrice: parseFloat(variant.price),
+    variantQuantity: parseInt(variant.quantity || "0"),
+    variantCOGS: parseFloat(variant.COGS),
+  }));
+
+  console.log("variants in update", variants);
+
+  let isValidationSuccess = false;
+  try {
+    const validatedFields = await UpdateProduct.parseAsync({
+      productName: formData.get("productName"),
+      brand: formData.get("brand"),
+      imageURL: imageFiles,
+      productDescription: formData.get("productDescription"),
+      stockQuantity: formData.get("stockQuantity"),
+      retailPrice: formData.get("retailPrice"),
+      COGS: formData.get("COGS"),
+      variants: variants,
+      hasVariants: variants.length > 0 ? true : false,
+      warehouse_enter_date: formData.get("warehouse_enter_date"),
+      exp_date: formData.get("exp_date"),
+    });
+
+    isValidationSuccess = true;
+    console.log("Parsing success");
+
+    // get access token
+    const cookieStore = cookies();
+    const accessToken = cookieStore.get("accessToken");
+
+    // Perform API call to create product
     const response = await fetch(
       `http://localhost:4000/dashboard/product/${id}`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken?.value}`,
         },
-        body: JSON.stringify(productData),
+        body: JSON.stringify(validatedFields),
       }
     );
-    console.log(response);
 
     if (!response.ok) {
-      throw new Error("Failed to update product details");
+      throw new Error("Failed to updated product");
     }
-    console.log("Product updated successfully");
+
+    const responseData = await response.json();
+    console.log("Product updated successfully", responseData);
+
+    return { message: "Product updated successfully" };
   } catch (error) {
-    console.error("Error updating product:", error);
+    if (error instanceof z.ZodError) {
+      console.error("Validation failed:", error.flatten().fieldErrors);
+      return {
+        errors: error.flatten().fieldErrors,
+        message: "Validation failed. Failed to updated product.",
+      };
+    } else if (error instanceof Error) {
+      console.error("Failed to updated product:", error.message);
+      return { message: error.message || "Failed to updated product" };
+    } else {
+      console.error("Unknown error:", error);
+      return { message: "An unknown error occurred" };
+    }
+  } finally {
+    if (isValidationSuccess) {
+      revalidatePath("/dashboard/product");
+      redirect("/dashboard/product");
+    }
   }
+  // const productData = UpdateProduct.parse({
+  //   productName: formData.get("productName") ?? "",
+  //   brand: formData.get("brand") ?? "",
+  //   imageURL: formData.getAll("image") as File[],
+  //   productDescription: formData.get("productDescription") ?? "",
+  //   stockQuantity: formData.get("stockQuantity") ?? "",
+  //   retailPrice: formData.get("retailPrice") ?? "",
+  //   COGS: formData.get("COGS") ?? "",
+  //   variants: formData.get("variants") ?? "",
+  //   warehouse_enter_date: formData.get("warehouse_enter_date") ?? "",
+  //   exp_date: formData.get("exp_date") ?? "",
+  // });
+
+  // // get access token
+  // const cookieStore = cookies();
+  // const accessToken = cookieStore.get("accessToken");
+  // try {
+  //   const response = await fetch(
+  //     `http://localhost:4000/dashboard/product/${id}`,
+  //     {
+  //       method: "PUT",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${accessToken?.value}`,
+  //       },
+  //       body: JSON.stringify(productData),
+  //     }
+  //   );
+  //   console.log(response);
+
+  //   if (!response.ok) {
+  //     throw new Error("Failed to update product details");
+  //   }
+  //   console.log("Product updated successfully");
+  // } catch (error) {
+  //   console.error("Error updating product:", error);
+  // }
 }
 
+// delete product
 export async function deleteProduct(id: string) {
+  // get access token
+  const cookieStore = cookies();
+  const accessToken = cookieStore.get("accessToken");
   try {
     const response = await fetch(
       `http://localhost:4000/dashboard/product/${id}`,
@@ -164,7 +485,7 @@ export async function deleteProduct(id: string) {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken?.value}`,
         },
       }
     );
@@ -178,84 +499,4 @@ export async function deleteProduct(id: string) {
   } catch (error) {
     console.error("Error deleting product:", error);
   }
-}
-
-
-const OrderFormSchema = z.object({
-  _id: z.string(),
-  amount: z.coerce
-    .number()
-    .gt(0, { message: 'Please enter an amount greater than $0.' }),
-  status: z.enum(['pending', 'paid'], {
-    invalid_type_error: 'Please select an invoice status.',
-  }),
-  date: z.string(),
-});
-
-const CreateOrder = OrderFormSchema.omit({ _id: true });
-const UpdateOrder = OrderFormSchema.omit({ _id: true });
-
-export type OrderState = {
-  errors?: {
-    amount?: string[];
-    status?: string[];
-    date?: string[];
-  };
-  message?: string | null;
-};
-
-export async function createInvoice(prevState: OrderState, formData: FormData) {
-  // Validate form fields using Zod
-  const validatedFields = CreateOrder.safeParse({
-    amount: formData.get('amount'),
-    status: formData.get('status'),
-  });
-
-  // If form validation fails, return errors early. Otherwise, continue.
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Create Invoice.',
-    };
-  }
-
-  validatedFields.data.amount *= 100;
-  const orderData = validatedFields.data;
-
-  try {
-    const response = await fetch(
-      "http://localhost:4000/dashboard/order/new",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(orderData),
-      }
-    );
-    console.log(response);
-
-    if (!response.ok) {
-      throw new Error("Faile to create new order");
-    }
-
-    const responseData = await response.json();
-    console.log(responseData);
-    if (!responseData || !responseData.product || !responseData.product._id) {
-      throw new Error(
-        "No response data or no responseData.product or no responseData.product._id"
-      );
-    }
-    
-    console.log("Order created successfully", responseData);
-  } catch (error) {
-    return {
-      message: 'Database Error: Failed to Create Product.'
-    };
-  }
-
-  // Revalidate the cache for the invoices page and redirect the user.
-  // revalidatePath('/dashboard/invoices');
-  // redirect('/dashboard/invoices');
 }

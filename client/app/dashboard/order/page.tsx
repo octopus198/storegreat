@@ -1,4 +1,4 @@
-'use client'
+// 'use client'
 import React from 'react'
 import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";
@@ -24,7 +24,7 @@ export default async function Order({
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
   const pageSize = 10;
-  const totalItems = await fetchOrderItems(query);
+  const totalItems = await fetchOrderItems();
 
   return (
     <div className="space-y-5 flex flex-col">

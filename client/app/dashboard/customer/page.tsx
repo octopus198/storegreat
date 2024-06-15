@@ -1,4 +1,4 @@
-'use client'
+// 'use client'
 import React from 'react'
 import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";

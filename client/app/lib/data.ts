@@ -1,14 +1,17 @@
-"use client";
+"use server"
 import { Product, ProductsTable } from "./definitions";
 import { unstable_noStore as noStore } from "next/cache";
 import Router, { useRouter } from "next/router";
 import { number } from "zod";
+import { cookies } from 'next/headers'
 
-let accessToken = localStorage.getItem("accessToken");
-// const router = useRouter();
-
+// this api return the product by id
 export async function fetchProductById(id:string) {
   noStore();
+    // get access token
+    const cookieStore = cookies()
+    const accessToken = cookieStore.get('accessToken')
+    console.log(accessToken)
   try {
     const response = await fetch(
       `http://localhost:4000/dashboard/product/${id}`,
@@ -16,7 +19,7 @@ export async function fetchProductById(id:string) {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken?.value}`,
         },
       }
     );
@@ -25,26 +28,23 @@ export async function fetchProductById(id:string) {
       throw new Error("Failed to get product details");
     }
     const productDetail = await response.json();
-    console.log(productDetail)
-    // const productDetailData = productDetail.map((product: Product) => ({
-    //   ...product,
-    //   // Convert amount from cents to dollars
-    //   retailPrice: (product.retailPrice as number) / 100,
-    //   COGS: (product.COGS as number) / 100,
-    // }));
-    
+    console.log(productDetail)    
     return productDetail;
   } catch (err) {
     console.log(err);
   }
 }
 
+// this api return the available products displayed for each page with search term
 const ITEMS_PER_PAGE = 10;
 export async function fetchFilteredProducts(
   query: string,
   currentPage: number
 ) {
   noStore();
+    // get access token
+    const cookieStore = cookies()
+    const accessToken = cookieStore.get('accessToken')
   const skip = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
     if (!accessToken) {
@@ -57,21 +57,9 @@ export async function fetchFilteredProducts(
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken.value}`,
       },
     });
-
-    // if response is 403 (invalid token) call the custom hook to get new refresh token
-    // if (!response.ok) {
-    //   if (response.status === 403) {
-    //     console.log("before using hook", response);
-    //     updateTokens(refreshToken);
-    //     setRetryToggle((retryToggle) => !retryToggle);
-    //     return;
-    //   } else {
-    //     throw new Error("Failed to get products");
-    //   }
-    // }
 
     const responseData = await response.json();
     console.log(responseData);
@@ -104,8 +92,13 @@ export async function fetchFilteredProducts(
   }
 }
 
+// this api return the number of available products
 export async function fetchProductItems(query: string) {
   noStore();
+    // get access token
+    const cookieStore = cookies()
+    const accessToken = cookieStore.get('accessToken')
+    console.log(accessToken?.value)
   try {
     if (!accessToken) {
       console.log("we have access token here");
@@ -117,7 +110,7 @@ export async function fetchProductItems(query: string) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken.value}`,
       },
     });
     const responseData = await response.json();
@@ -131,6 +124,39 @@ export async function fetchProductItems(query: string) {
   } catch (error) {
     console.error("Database Error:", error);
     throw new Error("Failed to fetch total number of products.");
+  }
+}
+
+// this api returns the available products
+export async function fetchProducts() {
+  noStore();
+    // get access token
+    const cookieStore = cookies()
+    const accessToken = cookieStore.get('accessToken')
+
+  try {
+    if (!accessToken) {
+      console.log("we have access token here");
+      //   router.push("/login");
+      return;
+    }
+
+    const response = await fetch("http://localhost:4000/dashboard/product", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken.value}`,
+      },
+    });
+    const responseData = await response.json();
+    console.log(responseData);
+    const filteredProducts = responseData.filter(
+      (product: Product) => !product.deletedAt
+    );
+    return filteredProducts;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch products.");
   }
 }
 

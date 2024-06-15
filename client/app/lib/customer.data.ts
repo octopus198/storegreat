@@ -1,12 +1,14 @@
-"use client";
+"use server";
 import { Customer, CustomersTable } from "./definitions";
 import { unstable_noStore as noStore } from "next/cache";
 import Router, { useRouter } from "next/router";
+import { cookies } from "next/headers";
 
-let accessToken = localStorage.getItem("accessToken");
 
 export async function fetchCustomerById(id:string) {
   noStore();
+  const cookieStore = cookies()
+  const accessToken = cookieStore.get('accessToken')
   try {
     const response = await fetch(
       `http://localhost:4000/dashboard/customer/${id}`,
@@ -14,7 +16,7 @@ export async function fetchCustomerById(id:string) {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken?.value}`,
         },
       }
     );
@@ -43,19 +45,15 @@ export async function fetchFilteredCustomers(
   currentPage: number
 ) {
   noStore();
+  const cookieStore = cookies()
+  const accessToken = cookieStore.get('accessToken')
   const skip = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
-    if (!accessToken) {
-      console.log("we have access token here");
-      //   router.push("/login");
-      return;
-    }
-
     const response = await fetch("http://localhost:4000/dashboard/customer", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken?.value}`,
       },
     });
 
@@ -92,6 +90,8 @@ export async function fetchFilteredCustomers(
 
 export async function fetchCustomerItems(query: string) { // this is to fetch pages 
   noStore();
+  const cookieStore = cookies()
+  const accessToken = cookieStore.get('accessToken')
   try {
     if (!accessToken) {
       console.log("we have access token here");
@@ -103,7 +103,7 @@ export async function fetchCustomerItems(query: string) { // this is to fetch pa
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken.value}`,
       },
     });
     const responseData = await response.json();
@@ -120,3 +120,27 @@ export async function fetchCustomerItems(query: string) { // this is to fetch pa
   }
 }
 
+export async function fetchCustomers() {
+  const cookieStore = cookies()
+  const accessToken = cookieStore.get('accessToken')
+  try {
+    const response = await fetch("http://localhost:4000/dashboard/customer", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken?.value}`,
+      },
+    });
+    const responseData = await response.json();
+    console.log(responseData);
+    let filteredCustomers = responseData.filter(
+      (customer: Customer) => !customer.deletedAt
+    );
+
+    filteredCustomers = filteredCustomers.sort((a: Customer, b: Customer) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());    
+    return filteredCustomers;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all customers.');
+  }
+}

@@ -1,59 +1,57 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { Box, Button, Flex } from "@radix-ui/themes";
+import Logo from "./ui/logo";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-
-export default function Home({
-  searchParams,
-}: {
-  searchParams: { page: string };
-}) {
-  const router = useRouter();
-
-  const handleGoToDashboard = () => {
-    router.push("/dashboard");
-  };
-
+import { lusitana } from "@/app/ui/fonts";
+import Image from "next/image";
+import CONSTANTS from "./lib/constants";
+export default function Page() {
   return (
-    <div className="w-full">
-      <nav className="h-16 flex justify-between items-center border-b px-24 pt-2 pb-2">
-        <Link href="/" className="font-extrabold text-xl">
-          STOREGREAT.
-        </Link>
-
-        <Box>
-          <Flex gap="4" align="center">
-            <Link href="/" className=" font-semibold text-md">
-              Home
-            </Link>
-            <Link href="/" className=" font-semibold text-md">
-              Pricing
-            </Link>
-            <Link href="/" className=" font-semibold text-md">
-              Contact
-            </Link>
-            <Button
-              color="indigo"
-              className="bg-indigo-600 hover:cursor-pointer rounded-md px-6 py-2 border-none font-semibold text-md"
-              onClick={handleGoToDashboard}
-            >
-              Sign in
-            </Button>
-          </Flex>
-        </Box>
-      </nav>
-      {/* <Box className="w-full"> */}
-      <Flex className="justify-between w-full">
-        <Box>
-          <Button
-            className="hover:cursor-pointer"
-            onClick={handleGoToDashboard}
+    <main className="flex  flex-col p-6">
+      <div className="flex h-20 shrink-0 items-end rounded-lg bg-indigo-600 p-4 md:h-52">
+        <Logo />
+      </div>
+      <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
+        <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10 md:w-2/5 md:px-20">
+          <p
+            className={`${lusitana.className} text-xl text-gray-800 md:text-3xl md:leading-normal`}
           >
-            Go to dashboard
-          </Button>
-        </Box>
-      </Flex>
-    </div>
+            <strong>Welcome to Stogreat.</strong> We help you{' '}
+            <a href="https://nextjs.org/learn/" className="text-blue-500">
+              manage products and orders
+            </a>
+            {' '}effortlessly
+          </p>
+          <Link
+            href="/login"
+            className="flex items-center gap-5 self-start rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-indigo-400 md:text-base"
+          >
+            <span>Log in</span> <ArrowRightIcon className="w-5 md:w-6" />
+          </Link>
+          <Link
+            href="/register"
+            className="flex items-center gap-5 self-start rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-indigo-400 md:text-base"
+          >
+            <span>Sign up</span> <ArrowRightIcon className="w-5 md:w-6" />
+          </Link>
+        </div>
+        <div className="flex items-center justify-center p-6 md:w-3/5 md:px-28 md:py-12">
+          {/* Add Hero Images Here */}
+          <img
+            src={CONSTANTS.EMPTY_IMG}
+            width={1000}
+            height={760}
+            alt="Screenshots of the dashboard project showing desktop version"
+            className="hidden md:block"
+          />
+          <img
+            src={CONSTANTS.EMPTY_IMG}
+            width={560}
+            height={620}
+            alt="Screenshot of the dashboard project showing mobile version"
+            className="block md:hidden"
+          />
+        </div>
+      </div>
+    </main>
   );
 }

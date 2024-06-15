@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 import React, { useEffect, useRef } from "react";
 import { Box, Button, Grid, TextArea, TextField } from "@radix-ui/themes";
 import { useState } from "react";
@@ -10,75 +10,6 @@ import { useAppContext } from "@/app/AppProvider";
 import Form from "@/app/ui/product/create-product";
 
 const NewProductPage = () => {
-  const [image, setImage] = useState<File | null>(null);
-  const [imageURL, setImageURL] = useState<string[]>([]);
-  const { accessToken, refreshToken, updateTokens } = useAppContext();
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
-
-  // HANDLE IMAGE UPLOAD SEPERATELY
-  const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0] || null;
-    if (file) {
-      setImage(file);
-
-      const formData = new FormData();
-      formData.append("files", file);
-
-      try {
-        const response = await fetch(
-          "http://localhost:4000/dashboard/product/new/upload",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-            body: formData,
-          }
-        );
-        console.log(response);
-        console.log(accessToken);
-
-        if (!response.ok) {
-          throw new Error("Faile to upload images")
-        }
-
-        // if (!response.ok) {
-        //   if (response.status === 403) {
-        //     if (retryCount < MAX_RETRY_COUNT) {
-        //       updateTokens(refreshToken);
-        //       handleImageUpload(event, retryCount + 1); 
-        //     } else {
-        //       console.error("Exceeded maximum retry count. Aborting upload.");
-        //     }
-        //   } else {
-        //     throw new Error("Failed to get product details");
-        //   }
-        // }
-
-        const data = await response.json();
-        console.log(data.files);
-
-        // receive the image URL from the server and store it in imageURL
-        setImageURL((prevURLs) => [...prevURLs, data.files[0].secure_url]);
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error("Error uploading images:", error.message);
-        } else {
-          console.error("Unknown error - adding images:", error);
-        }
-      }
-    }
-  };
-
-
-  // HANDLE BUTTON CLICK TO UPLOAD IMAGE
-  const handleUploadButtonClick = () => {
-    fileInputRef.current?.click();
-  };
 
   return (
     <div className="w-full flex flex-col justify-center items-center">

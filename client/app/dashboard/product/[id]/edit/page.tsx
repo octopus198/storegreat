@@ -1,4 +1,4 @@
-"use client"
+// "use client"
 import Form from '@/app/ui/product/edit-form';
 import Breadcrumbs from '@/app/ui/product/breadcrumbs';
 import { Suspense } from 'react';

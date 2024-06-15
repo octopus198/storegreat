@@ -1,4 +1,4 @@
-'use client'
+// 'use client'
 import Pagination from "@/app/ui/pagination";
 import ProductTable from "@/app/ui/product/table";
 import { fetchProductItems } from "@/app/lib/data";

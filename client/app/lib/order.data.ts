@@ -1,12 +1,13 @@
-"use client";
+"use server";
 import { Order, OrdersTable } from "./definitions";
 import { unstable_noStore as noStore } from "next/cache";
 import Router, { useRouter } from "next/router";
-
-let accessToken = localStorage.getItem("accessToken");
+import { cookies } from 'next/headers'
 
 export async function fetchOrderById(id:string) {
   noStore();
+  const cookieStore = cookies()
+  const accessToken = cookieStore.get('accessToken')
   try {
     const response = await fetch(
       `http://localhost:4000/dashboard/order/${id}`,
@@ -14,7 +15,7 @@ export async function fetchOrderById(id:string) {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken?.value}`,
         },
       }
     );
@@ -43,6 +44,8 @@ export async function fetchFilteredOrders(
   currentPage: number
 ) {
   noStore();
+  const cookieStore = cookies()
+  const accessToken = cookieStore.get('accessToken')
   const skip = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
     if (!accessToken) {
@@ -55,7 +58,7 @@ export async function fetchFilteredOrders(
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken.value}`,
       },
     });
 
@@ -66,8 +69,12 @@ export async function fetchFilteredOrders(
     );
 
     filteredOrders = filteredOrders.sort((a: Order, b: Order) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());
+
     console.log("Get orders successfully", responseData);
     console.log("filtered orders", filteredOrders);
+    // filteredOrders.forEach((order: Order, index: number) => {
+    //   console.log(`Order ${index + 1}:`, order.products);
+    // });
     // if (query) {
     //   const queriedProducts = filteredOrders.filter((order: Order) =>
     //     order.orderName.toLowerCase().includes(query.toLowerCase())
@@ -90,8 +97,10 @@ export async function fetchFilteredOrders(
   }
 }
 
-export async function fetchOrderItems(query: string) {
+export async function fetchOrderItems() {
   noStore();
+  const cookieStore = cookies()
+  const accessToken = cookieStore.get('accessToken')
   try {
     if (!accessToken) {
       console.log("we have access token here");
@@ -103,11 +112,11 @@ export async function fetchOrderItems(query: string) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken.value}`,
       },
     });
     const responseData = await response.json();
-    console.log(responseData);
+    console.log("fetchOrderItems",responseData);
     const filteredOrders = responseData.filter(
       (order: Order) => !order.deletedAt
     );

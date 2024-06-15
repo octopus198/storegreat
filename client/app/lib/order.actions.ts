@@ -1,139 +1,260 @@
-"use client";
+"use server";
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { useRouter } from "next/router";
+import { cookies } from "next/headers";
+const CustomerSchema = z.object({
+  name: z.string(),
+});
 
-let accessToken = localStorage.getItem("accessToken");
+const VariantSchema = z.object({
+  variantId: z.string().nullable(),
+  productId: z.string().min(1, { message: "Product cannot be empty." }),
+  quantity: z
+    .number()
+    .int()
+    .positive({ message: "Quantity must be greater than 0." }),
+});
 
 const OrderFormSchema = z.object({
-    _id: z.string(),
-    amount: z.coerce
-      .number()
-      .gt(0, { message: 'Please enter an amount greater than $0.' }),
-    status: z.enum(['pending', 'paid'], {
-      invalid_type_error: 'Please select an invoice status.',
-    }),
-    date: z.string(),
-  });
-  
-  const CreateOrder = OrderFormSchema.omit({ _id: true, date: true });
-  const UpdateOrder = OrderFormSchema.omit({ _id: true });
-  
-  export type OrderState = {
-    errors?: {
-      amount?: string[];
-      status?: string[];
-    };
-    message?: string | null;
+  _id: z.string(),
+  customerId: z.string({
+    invalid_type_error: "Customer is required",
+  }),
+  products: z
+    .array(VariantSchema)
+    .min(1, { message: "At least one product is required." }),
+  amount: z.coerce.number().gte(0),
+  cost: z.coerce.number().gte(0),
+  status: z.enum(["pending", "paid"], {
+    invalid_type_error: "Please select an order status.",
+  }),
+  deletedAt: z.string(),
+  creation_date: z.string(),
+});
+
+const CreateOrder = OrderFormSchema.omit({
+  _id: true,
+  deletedAt: true,
+  creation_date: true,
+});
+const UpdateOrder = OrderFormSchema.omit({
+  _id: true,
+  deletedAt: true,
+  creation_date: true,
+});
+
+export type State = {
+  errors?: {
+    customerId?: string[];
+    products?: string[];
+    amount?: string[];
+    status?: string[];
   };
-  
-  export async function createOrder(prevState: OrderState, formData: FormData) {
-    // Validate form fields using Zod
-    const validatedFields = CreateOrder.safeParse({
-      amount: formData.get('amount'),
-      status: formData.get('status'),
-    });
-  
-    // If form validation fails, return errors early. Otherwise, continue.
-    if (!validatedFields.success) {
-      return {
-        errors: validatedFields.error.flatten().fieldErrors,
-        message: 'Missing Fields. Failed to Create Invoice.',
-      };
-    }
-  
-    validatedFields.data.amount *= 100;
-    const orderData = validatedFields.data;
-  
-    try {
-      const response = await fetch(
-        "http://localhost:4000/dashboard/order/new",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(orderData),
-        }
-      );
-      console.log(response);
-  
-      if (!response.ok) {
-        throw new Error("Failed to create new order");
+  message?: string | null;
+};
+
+export async function createOrder(
+  prevState: State,
+  formData: FormData
+): Promise<State> {
+  const cookieStore = cookies();
+  const accessToken = cookieStore.get("accessToken");
+
+  // get the products data
+  const productsData: {
+    variantId: string;
+    productId: string;
+    quantity: string;
+  }[] = [];
+
+  for (const [key, value] of formData.entries()) {
+    if (key.startsWith("product")) {
+      const [_, index, prop] = key.split(".");
+      const field = parseInt(index);
+      if (!productsData[field]) {
+        productsData[field] = {
+          variantId: "",
+          productId: "",
+          quantity: "",
+        };
       }
-  
-      const responseData = await response.json();
-      console.log(responseData);
-      if (!responseData || !responseData.product || !responseData.product._id) {
-        throw new Error(
-          "No response data or no responseData.product or no responseData.product._id"
-        );
+      if (prop === "variantId") {
+        productsData[field]["variantId"] = value.toString();
+      } else if (prop === "quantity") {
+        productsData[field]["quantity"] = value.toString();
       }
-      
-      console.log("Order created successfully", responseData);
-    } catch (error) {
-      return {
-        message: 'Database Error: Failed to Create Product.'
-      };
     }
-  
-    // Revalidate the cache for the invoices page and redirect the user.
-    // revalidatePath('/dashboard/invoices');
-    // redirect('/dashboard/invoices');
   }
-  
 
-// export async function updateProduct(id: string, formData: FormData) {
-//   const validatedFields = UpdateProduct.safeParse({
-//     productName: formData.get("productName"),
-//     brandName: formData.get("brandName"),
-//     productDescription: formData.get("description"),
-//     retailPrice: formData.get("retailPrice"),
-//     COGS: formData.get("COGS"),
-//     stockQuantity: formData.get("warehouseQuantity"),
-//     warehouse_enter_date: formData.get("warehouseEnterDate"),
-//     exp_date: formData.get("expiryDate"),
-//   });
+  const products = productsData.map((product) => {
+    const { variantId, productId } = product;
+    const [parsedProductId, parsedVariantId] = variantId.split("|");
+    console.log("parsed product id is", parsedProductId);
+    console.log("parsed variant id is", parsedVariantId);
+    return {
+      productId: parsedProductId,
+      variantId: parsedVariantId ? parsedVariantId : null,
+      quantity: parseInt(product.quantity || "0"),
+    };
+  });
 
-//   if (!validatedFields.success) {
-//     return {
-//       errors: validatedFields.error.flatten().fieldErrors,
-//       message: "Missing Fields. Failed to Create Invoice.",
-//     };
-//   }
+  // console.log(products);
 
-//   validatedFields.data.retailPrice *= 100;
-//   validatedFields.data.COGS *= 100;
-//   const productData = validatedFields.data;
+  // Validate form fields using Zod
+  const validatedFields = CreateOrder.safeParse({
+    amount: formData.get("amount"),
+    cost: formData.get("cost"),
+    status: formData.get("status"),
+    customerId: formData.get("customerId"),
+    products: products,
+  });
 
-//   try {
-//     console.log(accessToken);
-//     const response = await fetch(
-//       `http://localhost:4000/dashboard/product/${id}`,
-//       {
-//         method: "PUT",
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `Bearer ${accessToken}`,
-//         },
-//         body: JSON.stringify(productData),
-//       }
-//     );
-//     console.log(response);
+  console.log("validatedFields data", validatedFields.data);
 
-//     if (!response.ok) {
-//       throw new Error("Failed to update product details");
-//     }
-//     console.log("Product updated successfully");
-//   } catch (error) {
-//     console.error("Error updating product:", error);
-//   }
-// }
+  if (!validatedFields.success) {
+    console.log("not success");
+    console.log("flatten errors", validatedFields.error.flatten().fieldErrors);
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing Fields. Failed to Create Order.",
+    };
+  }
+
+  console.log("order data is ", validatedFields.data);
+  try {
+    const response = await fetch("http://localhost:4000/dashboard/order/new", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken?.value}`,
+      },
+      body: JSON.stringify(validatedFields.data),
+    });
+    console.log(response);
+
+    if (!response.ok) {
+      throw new Error("Failed to create new order");
+    }
+
+    const responseData = await response.json();
+    console.log("Order created successfully", responseData);
+  } catch (error) {
+    return {
+      message: "Database Error: Failed to Create Product.",
+    };
+  }
+
+  // Revalidate the cache for the invoices page and redirect the user.
+  revalidatePath("/dashboard/order");
+  redirect("/dashboard/order");
+}
+
+export async function updateOrder(
+  id: string,
+  prevState: State,
+  formData: FormData
+): Promise<State> {
+  const cookieStore = cookies();
+  const accessToken = cookieStore.get("accessToken");
+
+  // get the products data
+  const productsData: {
+    variantId: string;
+    productId: string;
+    quantity: string;
+  }[] = [];
+
+  for (const [key, value] of formData.entries()) {
+    if (key.startsWith("product")) {
+      const [_, index, prop] = key.split(".");
+      const field = parseInt(index);
+      if (!productsData[field]) {
+        productsData[field] = {
+          variantId: "",
+          productId: "",
+          quantity: "",
+        };
+      }
+      if (prop === "variantId") {
+        productsData[field]["variantId"] = value.toString();
+      } else if (prop === "quantity") {
+        productsData[field]["quantity"] = value.toString();
+      }
+    }
+  }
+
+  const products = productsData.map((product) => {
+    const { variantId, productId } = product;
+    const [parsedProductId, parsedVariantId] = variantId.split("|");
+    console.log("parsed product id is", parsedProductId);
+    console.log("parsed variant id is", parsedVariantId);
+    return {
+      productId: parsedProductId,
+      variantId: parsedVariantId ? parsedVariantId : null,
+      quantity: parseInt(product.quantity || "0"),
+    };
+  });
+
+  // console.log(products);
+
+  // Validate form fields using Zod
+  const validatedFields = CreateOrder.safeParse({
+    amount: formData.get("amount"),
+    cost: formData.get("cost"),
+    status: formData.get("status"),
+    customerId: formData.get("customerId"),
+    products: products,
+  });
+
+  console.log("validatedFields data", validatedFields.data);
+
+  if (!validatedFields.success) {
+    console.log("not success");
+    console.log("flatten errors", validatedFields.error.flatten().fieldErrors);
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing Fields. Failed to Create Order.",
+    };
+  }
+
+  console.log("order data is ", validatedFields.data);
+  try {
+    const response = await fetch(
+      `http://localhost:4000/dashboard/order/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken?.value}`,
+        },
+        body: JSON.stringify(validatedFields.data),
+      }
+    );
+    console.log(response);
+
+    if (!response.ok) {
+      throw new Error("Failed to create new order");
+    }
+
+    const responseData = await response.json();
+    console.log("Order created successfully", responseData);
+  } catch (error) {
+    return {
+      message: "Database Error: Failed to Create Product.",
+    };
+  }
+
+  // Revalidate the cache for the invoices page and redirect the user.
+  revalidatePath("/dashboard/order");
+  redirect("/dashboard/order");
+}
 
 export async function deleteOrder(id: string) {
+  const cookieStore = cookies();
+  const accessToken = cookieStore.get("accessToken");
   try {
     const response = await fetch(
       `http://localhost:4000/dashboard/order/${id}`,
@@ -141,7 +262,7 @@ export async function deleteOrder(id: string) {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken?.value}`,
         },
       }
     );
@@ -156,5 +277,3 @@ export async function deleteOrder(id: string) {
     console.error("Error deleting order:", error);
   }
 }
-
-

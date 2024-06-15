@@ -4,8 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { fetchFilteredProducts } from "@/app/lib/data";
 import { DeleteProduct, UpdateProduct } from "./buttons";
-const defaultImageURL =
-  "https://res.cloudinary.com/dqw2psxim/image/upload/v1716641949/no_image_uyotz1.png";
+import { ArrowTrendingDownIcon } from "@heroicons/react/24/outline";
+import CONSTANTS from "@/app/lib/constants"
+import { formatWithCommas } from "@/app/lib/utils";
+// const defaultImageURL =
+//   "https://res.cloudinary.com/dqw2psxim/image/upload/v1716641949/no_image_uyotz1.png";
 
 interface Product {
   _id: string;
@@ -15,7 +18,21 @@ interface Product {
   COGS: number;
   stockQuantity: number;
   deletedAt: string | null;
+  hasVariants: boolean;
+  variants?: {
+    variantName: string;
+    variantPrice: number;
+    variantCOGS: number;
+    variantQuantity: number;
+  }[];
 }
+
+type Variant = {
+  variantName: string;
+  variantPrice: number;
+  variantCOGS: number;
+  variantQuantity: number;
+}[];
 
 export default async function ProductTable({
   query,
@@ -25,6 +42,37 @@ export default async function ProductTable({
   currentPage: number;
 }) {
   const displayedProducts = await fetchFilteredProducts(query, currentPage);
+
+  function getTotalStock(product: Product): number {
+    let totalStock = 0;
+    if (product.hasVariants) {
+      product.variants?.forEach((variant) => {
+        totalStock += variant.variantQuantity;
+      });
+    }
+    return totalStock;
+  }
+
+  function getTotalStockValue(product: Product): number {
+    let totalStockValue = 0;
+    if (product.hasVariants) {
+      product.variants?.forEach((variant) => {
+        totalStockValue += variant.variantQuantity * variant.variantCOGS;
+      });
+    }
+    return totalStockValue;
+  }
+
+  function getTotalVariants(product: Product): number {
+    let totalVariants = 0;
+    if (product.hasVariants) {
+      product.variants?.forEach((variant) => {
+        totalVariants += 1;
+      });
+    }
+    return totalVariants;
+  }
+
   return (
     <div>
       <Table.Root variant="surface">
@@ -40,16 +88,16 @@ export default async function ProductTable({
           </Table.Row>
         </Table.Header>
 
-        <Table.Body >
+        <Table.Body>
           {displayedProducts.map((product: Product) => (
-            <Table.Row key={product._id} >
+            <Table.Row key={product._id}>
               <Table.Cell>
                 <img
                   className="w-10 h-10 object-cover rounded border-solid border-2 border-zinc-200"
                   src={
                     product.imageURL.length > 0
                       ? product.imageURL[0]
-                      : defaultImageURL
+                      : CONSTANTS.EMPTY_IMG
                   }
                   alt={product.productName}
                   width="50"
@@ -61,10 +109,31 @@ export default async function ProductTable({
                   {product.productName}
                 </Link>
               </Table.Cell>
-              <Table.Cell>{product.retailPrice}</Table.Cell>
-              <Table.Cell>{product.COGS}</Table.Cell>
-              <Table.Cell style={{ color: product.stockQuantity < 10 ? 'red' : 'inherit' }}>{product.stockQuantity}</Table.Cell>
-              <Table.Cell>{product.COGS * product.stockQuantity}</Table.Cell>
+              <Table.Cell>{formatWithCommas(product.retailPrice)}</Table.Cell>
+              <Table.Cell>{formatWithCommas(product.COGS)}</Table.Cell>
+              <Table.Cell
+                style={{
+                  color:
+                    (product.hasVariants && getTotalStock(product) <= CONSTANTS.LOWSTOCK_THRESHOLD) ||
+                    (!product.hasVariants && product.stockQuantity <= CONSTANTS.LOWSTOCK_THRESHOLD)
+                      ? "red"
+                      : "inherit",
+                }}
+              >
+                {product.hasVariants ? (
+                  <div className="flex items-center">
+                    <span style={{ marginRight: 5 }}>{getTotalStock(product)}</span>
+                    {(product.hasVariants && getTotalStock(product) < 10) ||
+                    (!product.hasVariants && product.stockQuantity < 10) ? (
+                      <ArrowTrendingDownIcon className="w-5 text-red-500 mr-1" />
+                    ) : null}
+                    in {getTotalVariants(product)} variants
+                  </div>
+                ) : (
+                  product.stockQuantity
+                )}
+              </Table.Cell>
+              <Table.Cell>{product.hasVariants ? formatWithCommas(getTotalStockValue(product)) : formatWithCommas(product.COGS * product.stockQuantity)}</Table.Cell>
               <Table.Cell>
                 <div className="flex justify-end gap-3">
                   <UpdateProduct id={product._id} />
