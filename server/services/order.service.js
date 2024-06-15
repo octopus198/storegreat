@@ -68,96 +68,121 @@ class OrderService {
   }
 
   async updateOrderDetail(userID, orderID, updatedData) {
-    // const existingOrder = await OrderModel.findOne({
-    //   userID,
-    //   _id: orderID,
-    // });
-    // if (Object.keys(updatedData).length === 0) {
-    //   return existingOrder;
-    // }
-    // Object.assign(existingOrder, updatedData);
-    // const updatedOrder = await existingOrder.save();
-
-    // return updatedOrder;
 
     try {
       // fetch existing order details
       const existingOrder = await OrderModel.findOne({ userID, _id: orderID });
-
+  
       if (!existingOrder) {
-        throw new Error(
-          `Order with userID ${userID} and orderID ${orderID} not found`
-        );
+        throw new Error(`Order with userID ${userID} and orderID ${orderID} not found`);
       }
-
-      // Check if there are any updates to apply
+  
+      // check if there are any updates to apply
       if (Object.keys(updatedData).length === 0) {
         return existingOrder;
       }
-
-      // If we have products data to update
+  
+      // handle product and variant removals
+      if (updatedData.products && updatedData.products.length > 0) {
+        // find products or variants in existing order not in updatedData
+        const removedProducts = existingOrder.products.filter((existingProduct) => {
+          return !updatedData.products.some((updatedProduct) =>
+            existingProduct.productId.equals(updatedProduct.productId) &&
+            (existingProduct.variantId ? existingProduct.variantId.equals(updatedProduct.variantId) : !existingProduct.variantId)
+          );
+        });
+  
+        // restore stock quantities for removed products or variants
+        for (const removedProduct of removedProducts) {
+          const product = await ProductModel.findOne({ _id: removedProduct.productId });
+  
+          if (!product) {
+            throw new Error(`Product with ID ${removedProduct.productId} not found`);
+          }
+  
+          if (removedProduct.variantId) {
+            const variant = product.variants.find((v) => v._id.equals(removedProduct.variantId));
+  
+            if (!variant) {
+              throw new Error(`Variant with ID ${removedProduct.variantId} not found in product ${removedProduct.productId}`);
+            }
+  
+            variant.variantQuantity += removedProduct.quantity;
+          } else {
+            product.stockQuantity += removedProduct.quantity;
+          }
+  
+          await product.save();
+        }
+      }
+  
+      // update existing products based on updatedData
       if (updatedData.products && updatedData.products.length > 0) {
         for (const updatedProduct of updatedData.products) {
-          const {
-            productId,
-            variantId,
-            quantity: updatedQuantity,
-          } = updatedProduct;
-
-          // Find the matching product and variant in the existing order
-          const existingProduct = existingOrder.products.find(
+          const { productId, variantId, quantity: updatedQuantity } = updatedProduct;
+  
+          let existingProduct = existingOrder.products.find(
             (p) =>
               p.productId.equals(updatedProduct.productId) &&
               (variantId
                 ? p.variantId && p.variantId.equals(updatedProduct.variantId)
                 : !p.variantId)
           );
-
-          if (!existingProduct) {
-            throw new Error(
-              `Product with ID ${productId} and variant ID ${variantId} not found in order`
-            );
-          }
-
-          const currentQuantity = existingProduct.quantity;
-          const quantityDifference = updatedQuantity - currentQuantity;
-
-          // Find the product in the ProductModel
+  
           const product = await ProductModel.findOne({ _id: productId });
-
+  
           if (!product) {
             throw new Error(`Product with ID ${productId} not found`);
           }
-
-          if (variantId) {
-            // Find and update the variant quantity
-            const variant = product.variants.find((v) =>
-              v._id.equals(variantId)
-            );
-
-            if (!variant) {
-              throw new Error(
-                `Variant with ID ${variantId} not found in product ${productId}`
-              );
+  
+          if (!existingProduct) {
+            // handle case where product or variant is added
+            if (variantId) {
+              const variant = product.variants.find((v) => v._id.equals(variantId));
+  
+              if (!variant) {
+                throw new Error(`Variant with ID ${variantId} not found in product ${productId}`);
+              }
+  
+              variant.variantQuantity -= updatedQuantity;
+            } else {
+              product.stockQuantity -= updatedQuantity;
             }
-
-            variant.variantQuantity -= quantityDifference;
+  
+            existingProduct = {
+              productId: updatedProduct.productId,
+              variantId: updatedProduct.variantId,
+              quantity: updatedQuantity,
+            };
+  
+            existingOrder.products.push(existingProduct);
           } else {
-            // Update the product stock quantity
-            product.stockQuantity -= quantityDifference;
+            // handle case where product or variant quantity is updated
+            const currentQuantity = existingProduct.quantity;
+            const quantityDifference = updatedQuantity - currentQuantity;
+  
+            if (variantId) {
+              const variant = product.variants.find((v) => v._id.equals(variantId));
+  
+              if (!variant) {
+                throw new Error(`Variant with ID ${variantId} not found in product ${productId}`);
+              }
+  
+              variant.variantQuantity -= quantityDifference;
+            } else {
+              product.stockQuantity -= quantityDifference;
+            }
+  
+            existingProduct.quantity = updatedQuantity;
           }
-
-          // Update existing order product quantity
-          existingProduct.quantity = updatedQuantity;
-
-          // Save the updated product
+  
           await product.save();
         }
       }
-
+  
       // update the rest of the order data
       Object.assign(existingOrder, updatedData);
-
+  
       // save and return the updated order
       const updatedOrder = await existingOrder.save();
       return updatedOrder;
