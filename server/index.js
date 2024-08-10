@@ -14,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors({
-    origin: 'https://storegreat-client.vercel.app'
+    origin: process.env.CORS_ORIGIN
 }));
 
 app.use(express.json());
