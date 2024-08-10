@@ -11,10 +11,10 @@ import mediaCustomerRoute from "./routes/media.customer.route.js";
 import dashboardRoute from "./routes/dashboard.route.js";
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 app.use(cors({
-    origin: 'http://localhost:3000'
+    origin: 'https://storegreat-client.vercel.app'
 }));
 
 app.use(express.json());
