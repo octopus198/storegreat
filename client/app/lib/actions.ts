@@ -141,7 +141,7 @@ async function checkProductNameExists(productName: string): Promise<boolean> {
     const cookieStore = cookies();
     const accessToken = cookieStore.get("accessToken");
     const response = await fetch(
-      "http://localhost:4000/dashboard/product/new/isproductexists",
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/product/new/isproductexists`,
       {
         method: "POST",
         headers: {
@@ -248,7 +248,7 @@ export async function createProduct(
     const accessToken = cookieStore.get("accessToken");
 
     const response = await fetch(
-      "http://localhost:4000/dashboard/product/new",
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/product/new`,
       {
         method: "POST",
         headers: {
@@ -306,7 +306,7 @@ export async function uploadImage(files: File[]): Promise<UploadResponse> {
 
   try {
     const response = await fetch(
-      "http://localhost:4000/dashboard/product/new/upload",
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/product/new/upload`,
       {
         method: "POST",
         headers: {
@@ -399,7 +399,7 @@ export async function updateProduct(
 
     // Perform API call to create product
     const response = await fetch(
-      `http://localhost:4000/dashboard/product/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/product/${id}`,
       {
         method: "PATCH",
         headers: {
@@ -447,7 +447,7 @@ export async function deleteProduct(id: string) {
   const accessToken = cookieStore.get("accessToken");
   try {
     const response = await fetch(
-      `http://localhost:4000/dashboard/product/delete/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/product/delete/${id}`,
       {
         method: "PATCH",
         headers: {

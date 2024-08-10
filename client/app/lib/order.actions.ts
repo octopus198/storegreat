@@ -118,7 +118,7 @@ export async function createOrder(
 
   console.log("order data is ", validatedFields.data);
   try {
-    const response = await fetch("http://localhost:4000/dashboard/order/new", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/order/new`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -214,7 +214,7 @@ export async function updateOrder(
   console.log("order data is ", validatedFields.data);
   try {
     const response = await fetch(
-      `http://localhost:4000/dashboard/order/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/order/${id}`,
       {
         method: "PUT",
         headers: {
@@ -248,7 +248,7 @@ export async function deleteOrder(id: string) {
   const accessToken = cookieStore.get("accessToken");
   try {
     const response = await fetch(
-      `http://localhost:4000/dashboard/order/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/order/${id}`,
       {
         method: "PATCH",
         headers: {

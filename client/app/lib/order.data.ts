@@ -22,7 +22,7 @@ export async function fetchOrderById(id:string) {
   const accessToken = cookieStore.get('accessToken')
   try {
     const response = await fetch(
-      `http://localhost:4000/dashboard/order/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/order/${id}`,
       {
         method: "GET",
         headers: {
@@ -54,8 +54,7 @@ export async function fetchFilteredOrders(
   const accessToken = cookieStore.get('accessToken')
   const skip = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
-    console.log("what's wrong?")
-    const response = await fetch("http://localhost:4000/dashboard/order", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/order`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -98,7 +97,7 @@ export async function fetchOrderItems(query: string) {
   const cookieStore = cookies()
   const accessToken = cookieStore.get('accessToken')
   try {
-    const response = await fetch("http://localhost:4000/dashboard/order", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/order`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

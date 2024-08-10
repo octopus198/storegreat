@@ -6,7 +6,7 @@ export function setToken(access_token, refresh_token) {
 export async function getNewToken(refreshToken) {
   console.log("passed refresh token", refreshToken)
   try {
-    const response = await fetch("http://localhost:4000/refresh-token", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/refresh-token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

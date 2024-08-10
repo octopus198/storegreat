@@ -10,7 +10,7 @@ export async function fetchCustomerById(id:string) {
   const accessToken = cookieStore.get('accessToken')
   try {
     const response = await fetch(
-      `http://localhost:4000/dashboard/customer/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/customer/${id}`,
       {
         method: "GET",
         headers: {
@@ -41,7 +41,7 @@ export async function fetchFilteredCustomers(
   const accessToken = cookieStore.get('accessToken')
   const skip = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
-    const response = await fetch("http://localhost:4000/dashboard/customer", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/customer`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -89,7 +89,7 @@ export async function fetchCustomerItems(query: string) { // this is to fetch pa
       return;
     }
 
-    const response = await fetch("http://localhost:4000/dashboard/customer", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/customer`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -114,7 +114,7 @@ export async function fetchCustomers() {
   const cookieStore = cookies()
   const accessToken = cookieStore.get('accessToken')
   try {
-    const response = await fetch("http://localhost:4000/dashboard/customer", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/customer`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

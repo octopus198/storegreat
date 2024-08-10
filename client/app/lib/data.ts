@@ -12,7 +12,7 @@ export async function fetchProductById(id:string) {
     console.log(accessToken)
   try {
     const response = await fetch(
-      `http://localhost:4000/dashboard/product/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/product/${id}`,
       {
         method: "GET",
         headers: {
@@ -49,7 +49,7 @@ export async function fetchFilteredProducts(
       return;
     }
 
-    const response = await fetch("http://localhost:4000/dashboard/product", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/product`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -100,7 +100,7 @@ export async function fetchProductItems(query: string) {
       return;
     }
 
-    const response = await fetch("http://localhost:4000/dashboard/product", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/product`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -133,7 +133,7 @@ export async function fetchProducts() {
       return;
     }
 
-    const response = await fetch("http://localhost:4000/dashboard/product", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/product`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

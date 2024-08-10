@@ -14,9 +14,9 @@ export async function fetchCardData() {
     };
 
     const urls = [
-      "http://localhost:4000/dashboard/getsales",
-      "http://localhost:4000/dashboard/getcost",
-      "http://localhost:4000/dashboard/productsold",
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/getsales`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/getcost`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/productsold`,
     ];
 
     const requests = urls.map((url) =>
@@ -73,7 +73,7 @@ export async function fetchRevenueData() {
   const accessToken = cookieStore.get("accessToken");
   try {
     const response = await fetch(
-      `http://localhost:4000/dashboard/revenuedata`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/revenuedata`,
       {
         method: "GET",
         headers: {
@@ -132,7 +132,7 @@ export async function fetchLatestOrders() {
   const accessToken = cookieStore.get("accessToken");
   try {
     const response = await fetch(
-      "http://localhost:4000/dashboard/latestorder",
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/latestorder`,
       {
         method: "GET",
         headers: {
@@ -159,7 +159,7 @@ export async function fetchUser() {
   const cookieStore = cookies();
   const accessToken = cookieStore.get("accessToken");
   try {
-    const response = await fetch("http://localhost:4000/getme", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/getme`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

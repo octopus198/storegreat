@@ -63,7 +63,7 @@ export async function createCustomer(
   const accessToken = cookieStore.get("accessToken");
   try {
     const response = await fetch(
-      "http://localhost:4000/dashboard/customer/new",
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/customer/new`,
       {
         method: "POST",
         headers: {
@@ -105,7 +105,7 @@ export async function uploadImage(file: File): Promise<{ secure_url: string }> {
 
   try {
     const response = await fetch(
-      "http://localhost:4000/dashboard/customer/new/upload",
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/customer/new/upload`,
       {
         method: "POST",
         headers: {
@@ -134,7 +134,7 @@ export async function deleteCustomer(id: string) {
     const cookieStore = cookies();
     const accessToken = cookieStore.get("accessToken");
     const response = await fetch(
-      `http://localhost:4000/dashboard/customer/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/customer/${id}`,
       {
         method: "PATCH",
         headers: {
@@ -177,7 +177,7 @@ export async function updateCustomer(
   const accessToken = cookieStore.get("accessToken");
   try {
     const response = await fetch(
-      `http://localhost:4000/dashboard/customer/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dashboard/customer/${id}`,
       {
         method: "PUT",
         headers: {
