@@ -19,7 +19,7 @@ export const refreshTokenController = async (req, res) => {
     const access_token = await signToken({
       payload: { id: user._id },
       privateKey: process.env.JWT_PRIVATE_KEY,
-      options: { expiresIn: "2d" },
+      options: { expiresIn: "1d" },
     });
     const new_refresh_token = generateRefreshToken();
     storedToken.token = new_refresh_token;

@@ -1,4 +1,3 @@
-import RefreshTokenModel from "../models/refresh.token.model.js";
 import refreshTokenService from "../services/refresh.token.service.js";
 
 // check if refresh token is invalid (expire)

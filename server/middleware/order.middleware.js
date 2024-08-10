@@ -1,5 +1,4 @@
 import { checkSchema } from "express-validator";
-import OrdertModel from "../models/order.model.js";
 import { ORDER_MESSAGE } from "../constants/message.js";
 import { validator } from "../utils/validator.js";
 

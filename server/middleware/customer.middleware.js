@@ -1,5 +1,4 @@
 import { checkSchema } from "express-validator";
-import CustomerModel from "../models/customer.model.js";
 import { CUSTOMER_MESSAGE } from "../constants/message.js";
 import { validator } from "../utils/validator.js";
 

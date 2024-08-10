@@ -11,7 +11,6 @@ export const authenticationValidator = (req, res, next) => {
 
   jwt.verify(token, process.env.JWT_PRIVATE_KEY, (err, user) => {
     if (err) {
-        // check the error in details (expire, invalid, etc...)
       if (err.name === "TokenExpiredError") {
         console.log("Token has expired");
         return res.status(403).json({ error: "Token has expired" });

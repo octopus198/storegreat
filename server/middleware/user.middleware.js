@@ -11,15 +11,6 @@ export const registerValidator = validator(
         exists: {
           errorMessage: MESSAGE.USERNAME_REQUIRED,
         },
-        // custom: {
-        //   options: async (value, { req }) => {
-        //     const existingUser = await UserModel.findOne({ username: value });
-        //     if (existingUser) {
-        //       throw new Error(MESSAGE.USERNAME_TAKEN);
-        //     }
-        //     return true;
-        //   },
-        // },
       },
       email: {
         isEmail: true,

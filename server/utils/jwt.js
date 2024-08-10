@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 export const signToken = ({ payload, privateKey, options }) => {
   return new Promise((resolve, reject) => {
     const token = jwt.sign(payload, privateKey, {
-      expiresIn: "2d",
+      expiresIn: "1d",
       ...options,
     });
     if (!token) {

@@ -1,6 +1,4 @@
-import CustomerModel from "../models/customer.model.js";
 import OrderModel from "../models/order.model.js";
-import ProductModel from "../models/product.model.js";
 
 class DashboardService {
   async getSales(userID) {
@@ -53,7 +51,7 @@ class DashboardService {
       if (!revenueData[monthYearKey]) {
         revenueData[monthYearKey] = 0;
       }
-      revenueData[monthYearKey] += order.amount; // Assuming totalAmount is the field containing order amount
+      revenueData[monthYearKey] += order.amount; 
     });
 
     const formattedRevenueData = Object.keys(revenueData).map((key) => ({
