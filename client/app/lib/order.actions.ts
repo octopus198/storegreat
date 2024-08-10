@@ -1,13 +1,8 @@
 "use server";
-
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { useRouter } from "next/router";
 import { cookies } from "next/headers";
-const CustomerSchema = z.object({
-  name: z.string(),
-});
 
 const VariantSchema = z.object({
   variantId: z.string().nullable(),
@@ -100,8 +95,6 @@ export async function createOrder(
       quantity: parseInt(product.quantity || "0"),
     };
   });
-
-  // console.log(products);
 
   // Validate form fields using Zod
   const validatedFields = CreateOrder.safeParse({
@@ -197,8 +190,6 @@ export async function updateOrder(
       quantity: parseInt(product.quantity || "0"),
     };
   });
-
-  // console.log(products);
 
   // Validate form fields using Zod
   const validatedFields = CreateOrder.safeParse({

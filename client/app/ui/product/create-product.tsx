@@ -8,6 +8,7 @@ import { createProduct, State, uploadImage } from "@/app/lib/actions";
 import { useState, ChangeEvent } from "react";
 import { Uploader } from "rsuite";
 import "rsuite/Uploader/styles/index.css";
+import { red } from "tailwindcss/colors";
 
 type FormValues = {
   variants: {
@@ -44,18 +45,19 @@ function TotalQuantity({ control }: { control: Control<FormValues> }) {
 export default function Form() {
   const initialState = { message: null, errors: {} };
   const [state, dispatch] = useFormState(createProduct, initialState);
-
-  // handle images
   const [images, setImages] = useState<string[]>([]);
 
   const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
 
-    if (images.length + files.length > 5) {
-      alert("You can only upload up to 5 images in total.");
+    if (files.length > 5) {
+      alert("You can only upload up to 5 images in one upload.");
+      event.target.value = "";
+      setImages([]);
       return;
     }
 
+    // Read and store image files
     const imageUrls = files.map((file) => {
       const reader = new FileReader();
       return new Promise<string>((resolve, reject) => {
@@ -73,8 +75,11 @@ export default function Form() {
       });
     });
 
+    // Update state with new images
     Promise.all(imageUrls)
-      .then((results) => setImages((prevImages) => [...prevImages, ...results]))
+      .then((results) => {
+        setImages(results);
+      })
       .catch((error) => alert(error));
   };
 
@@ -98,7 +103,7 @@ export default function Form() {
             htmlFor="productName"
             className="block text-zinc-700 font-semibold text-normal"
           >
-            Product name
+            Product name <span style={{ color: "red" }}>*</span>
           </label>
           <TextField.Root
             aria-describedby="product-error"
@@ -203,6 +208,7 @@ export default function Form() {
                 <input
                   type="number"
                   placeholder="Variant Price"
+                  step="0.01"
                   {...register(`variants.${index}.variantPrice`, {
                     required: true,
                     valueAsNumber: true,
@@ -226,6 +232,7 @@ export default function Form() {
                 Variant Cost
                 <input
                   type="number"
+                  step="0.01"
                   placeholder="Variant Cost"
                   {...register(`variants.${index}.variantCOGS`, {
                     required: true,
@@ -285,12 +292,6 @@ export default function Form() {
           />
         </div>
         <div id="quantity-error" aria-live="polite" aria-atomic="true">
-          {/* {state.errors?.stockQuantity &&
-            state.errors.stockQuantity.map((error: string) => (
-              <p className="mt-2 text-sm text-red-500" key={error}>
-                {error}
-              </p>
-            ))} */}
         </div>
         <div className="space-y-2">
           <label
@@ -376,8 +377,7 @@ function CreatProductButton() {
       className="bg-indigo-600 hover:bg-indigo-400"
       aria-disabled={pending}
     >
-      {pending? <Spinner />: " "} Create Product
+      {pending ? <Spinner /> : " "} Create Product
     </Button>
   );
 }
-

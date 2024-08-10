@@ -23,12 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="overscroll-none">
-        {/* <AppProvider> */}
           <Theme accentColor="indigo" grayColor="mauve"> 
             <main>{children}</main>
-            {/* <ThemePanel/> */}
           </Theme>
-        {/* </AppProvider> */}
       </body>
     </html>
   );

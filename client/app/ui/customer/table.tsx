@@ -1,7 +1,6 @@
 import React from "react";
 import { Table } from "@radix-ui/themes";
 import Link from "next/link";
-import Image from "next/image";
 import { fetchFilteredCustomers } from "@/app/lib/customer.data";
 import { DeleteCustomer, UpdateCustomer } from "./buttons";
 import { formatDateToLocal } from "@/app/lib/utils";
@@ -30,7 +29,7 @@ export default async function CustomerTable({
             <Table.ColumnHeaderCell>Avatar</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Date created</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Actions</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell style={{ textAlign: 'right' }}>Actions</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 

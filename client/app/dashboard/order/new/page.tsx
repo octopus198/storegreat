@@ -1,14 +1,8 @@
-// "use client"
 import Form from "@/app/ui/order/create-order";
-import { Metadata } from "next";
 import { fetchCustomers } from "@/app/lib/customer.data";
 import { fetchProducts } from "@/app/lib/data";
 import Link from "next/link";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
-
-// export const metadata: Metadata = {
-//   title: "Create Invoice",
-// };
 
 export default async function Page() {
   const customers = await fetchCustomers();

@@ -1,15 +1,8 @@
-import {
-  BanknotesIcon,
-  ClockIcon,
-  UserGroupIcon,
-  InboxIcon,
-  CurrencyDollarIcon,
-} from "@heroicons/react/24/outline";
+import { BanknotesIcon, InboxIcon } from "@heroicons/react/24/outline";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchCardData } from "@/app/lib/dashboard.data";
 import { formatWithCommas } from "@/app/lib/utils";
 import { ArrowDownIcon, ArrowUpIcon } from "@radix-ui/react-icons";
-
 
 const iconMap = {
   sales: ArrowDownIcon,
@@ -26,7 +19,11 @@ export default async function CardWrapper() {
     <>
       <Card title="Sales" value={formatWithCommas(totalSales)} type="sales" />
       <Card title="Costs" value={formatWithCommas(totalCost)} type="costs" />
-      <Card title="Profit" value={formatWithCommas(totalProfit)} type="profit" />
+      <Card
+        title="Profit"
+        value={formatWithCommas(totalProfit)}
+        type="profit"
+      />
       <Card title="Total Products Sold" value={productSold} type="product" />
     </>
   );

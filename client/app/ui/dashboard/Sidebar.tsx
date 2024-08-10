@@ -44,31 +44,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-
-// <aside className="bg-zinc-200 h-screen px-1 py-1 flex flex-col">
-//   <ul className=" flex flex-col space-y-2">
-//     {links.map((link) => (
-//       <Link href={link.href}>
-//         <li
-//           key={link.href}
-//           className={`${classNames({
-//             "text-indigo-800 font-bold bg-indigo-200 rounded-md": link.href === currentPath,
-//             "text-zinc-500 font-normal": link.href !== currentPath,
-//             "hover:bg-indigo-200 rounded-md px-5 py-5 transition-colors":
-//               true,
-//           })} flex items-center gap-2`}
-//         >
-//           <div>{link.icon}</div>
-//           {link.label}
-//         </li>
-//       </Link>
-//     ))}
-//   </ul>
-//   <div
-//     onClick={handleSignOut}
-//     className="text-zinc-500 font-normal hover:text-indigo-800 hover:font-bold hover:bg-indigo-200 rounded-md px-5 py-5 transition-colors flex items-center gap-2"
-//   >
-//     <IoPowerOutline size={25} />
-//     Log out
-//   </div>
-// </aside>

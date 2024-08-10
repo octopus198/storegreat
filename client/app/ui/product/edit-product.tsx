@@ -158,8 +158,6 @@ export default function Form({ productDetail }: { productDetail: Product }) {
                   {...register(`variants.${index}.variantName`, {
                     required: true,
                   })}
-                  // defaultValue={field.variantName}
-                  // onChange={(e) => handleUpdate(index, 'variantName', e.target.value)}
                   className="block w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-inset focus:ring-indigo-600"
                 />
               </label>

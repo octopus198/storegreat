@@ -11,7 +11,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button } from "@/app/ui/buttons";
 import { createOrder } from "@/app/lib/order.actions";
-import { Spinnaker } from "next/font/google";
 import { Spinner } from "@radix-ui/themes";
 
 type FormValues = {
@@ -116,8 +115,11 @@ export default function Form({
       {/* Customer Name */}
       <div className="bg-white px-10 py-10 rounded-lg shadow-md space-y-4">
         <div className="space-y-2">
-          <label htmlFor="customer" className="mb-2 block text-sm font-medium">
-            Choose customer
+          <label
+            htmlFor="customer"
+            className="block text-zinc-700 font-semibold text-normal"
+          >
+            Choose customer <span style={{ color: "red" }}>*</span>
           </label>
           <div className="relative">
             <select
@@ -155,7 +157,7 @@ export default function Form({
             htmlFor="variant"
             className="block text-zinc-700 font-semibold text-normal"
           >
-            Choose Product
+            Choose Product <span style={{ color: "red" }}>*</span>
           </label>
           {fields.map((field, index) => (
             <div key={field.id} className="flex space-x-4">
@@ -167,7 +169,7 @@ export default function Form({
                     {...register(`product.${index}.variantId`, {
                       required: "Product is required",
                     })}
-                    className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                    className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-2 text-sm outline-2 placeholder:text-gray-500"
                     defaultValue=""
                     aria-describedby="product-error"
                   >
@@ -195,7 +197,6 @@ export default function Form({
                       )
                     )}
                   </select>
-                  <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
                 </div>
               </label>
               <label htmlFor="">
@@ -225,7 +226,7 @@ export default function Form({
               append({ variantId: "", productId: "", quantity: 0 })
             }
           >
-            Add Variant
+            Add Product
           </Button>
         </div>
         <p className="text-zinc-700 font-semibold">
@@ -251,7 +252,7 @@ export default function Form({
             htmlFor="status"
             className="block text-zinc-700 font-semibold text-normal"
           >
-            Set order status
+            Set order status <span style={{ color: "red" }}>*</span>
           </label>
           <fieldset>
             <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3">
@@ -300,12 +301,6 @@ export default function Form({
         </div>
       </div>
 
-      {/* <div aria-live="polite" aria-atomic="true">
-          {state.message ? (
-            <p className="mt-2 text-sm text-red-500">{state.message}</p>
-          ) : null}
-        </div> */}
-
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/order"
@@ -313,7 +308,7 @@ export default function Form({
         >
           Cancel
         </Link>
-        <CreateOrderButton/>
+        <CreateOrderButton />
       </div>
     </form>
   );
@@ -327,110 +322,7 @@ function CreateOrderButton() {
       className="bg-indigo-600 hover:bg-indigo-400"
       aria-disabled={pending}
     >
-      {pending? <Spinner />: " "} Create Order
+      {pending ? <Spinner /> : " "} Create Order
     </Button>
   );
 }
-
-{
-  /* Product */
-}
-{
-  /* <div className="mb-4">
-          <label htmlFor="product" className="mb-2 block text-sm font-medium">
-            Choose product
-          </label>
-          <div className="relative">
-            <select
-              id="product"
-              name="product"
-              className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue=""
-              aria-describedby="product-error"
-            >
-              <option value="" disabled>
-                Select a product
-              </option>
-              {products.map((product) =>
-                product.variants.length > 0 ? (
-                  <optgroup key={product._id} label={product.productName}>
-                    {product.variants.map((variant) => (
-                      <option key={variant._id} value={variant._id}>
-                        {variant.variantName} (Stock: {variant.variantQuantity})
-                      </option>
-                    ))}
-                  </optgroup>
-                ) : (
-                  <option key={product._id} value={product._id}>
-                    {product.productName} (Stock: {product.stockQuantity})
-                  </option>
-                )
-              )}
-            </select>
-            <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
-          </div>
-        </div> */
-}
-
-// Product Quantity
-// <div className="mb-4">
-//   <label
-//     htmlFor="productQuantity"
-//     className="mb-2 block text-sm font-medium"
-//   >
-//     Choose Quantity
-//   </label>
-//   <div className="relative mt-2 rounded-md">
-//     <div className="relative">
-//       <input
-//         id="productQuantity"
-//         name="productQuantity"
-//         type="number"
-//         step="0.01"
-//         placeholder="Enter USD amount"
-//         className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-//         aria-describedby="amount-error"
-//       />
-//       <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-//     </div>
-//   </div>
-
-//   <div id="amount-error" aria-live="polite" aria-atomic="true">
-//     {state.errors?.amount &&
-//       state.errors.amount.map((error: string) => (
-//         <p className="mt-2 text-sm text-red-500" key={error}>
-//           {error}
-//         </p>
-//       ))}
-//   </div>
-// </div>
-
-// {/* Invoice Amount */}
-// <div className="mb-4">
-//   <label htmlFor="amount" className="mb-2 block text-sm font-medium">
-//     Choose an amount
-//   </label>
-//   <div className="relative mt-2 rounded-md">
-//     <div className="relative">
-//       <input
-//         id="amount"
-//         name="amount"
-//         type="number"
-//         step="0.01"
-//         placeholder="Enter USD amount"
-//         className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-//         aria-describedby="amount-error"
-//       />
-//       <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-//     </div>
-//   </div>
-
-//   <div id="amount-error" aria-live="polite" aria-atomic="true">
-//     {state.errors?.amount &&
-//       state.errors.amount.map((error: string) => (
-//         <p className="mt-2 text-sm text-red-500" key={error}>
-//           {error}
-//         </p>
-//       ))}
-//   </div>
-// </div>

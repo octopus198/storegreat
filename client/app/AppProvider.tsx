@@ -48,38 +48,3 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     </AppContext.Provider>
   );
 };
-
-// const checkTokenExpiration = async () => {
-//   // not use jwt to decode access token anymore. split the payload and just get exp
-//   const accessToken = localStorage.getItem("accessToken");
-//   if (accessToken) {
-//     const [, payloadBase64] = accessToken.split(".");
-//     const payload = JSON.parse(atob(payloadBase64));
-//     const expiryTime = payload.exp * 1000;
-//     const currentTime = new Date().getTime();
-
-//     if (expiryTime - currentTime < 60 * 1000) {
-//       try {
-//         const storedRefreshToken = localStorage.getItem("refreshToken");
-//         const { access_token, refresh_token } = await getNewToken(
-//           storedRefreshToken
-//         );
-//         localStorage.setItem("accessToken", access_token);
-//         localStorage.setItem("refreshToken", refresh_token);
-//         setAccessToken(access_token);
-//         setRefreshToken(refresh_token);
-//       } catch (error) {
-//         console.error("Error refreshing access token:", error);
-//       }
-//     }
-//   }
-// };
-
-// useEffect(() => {
-//   checkTokenExpiration();
-//   const interval = setInterval(() => {
-//     checkTokenExpiration();
-//   }, 60 * 1000);
-
-//   return () => clearInterval(interval);
-// }, []);

@@ -1,20 +1,10 @@
 import { BarChart, Card } from "@tremor/react";
-import Link from "next/link";
 import { lusitana } from "../fonts";
-import { fetchCardData, fetchRevenueData } from "@/app/lib/dashboard.data";
-import { Color } from "@tremor/react";
-import colors from "tailwindcss/colors";
+import { fetchRevenueData } from "@/app/lib/dashboard.data";
 import { CalendarIcon } from "@heroicons/react/24/outline";
-
-type RevenueChartDataItem = {
-  monthYear: string;
-  totalSales: number;
-};
 
 export default async function RevenueChart() {
   const revenueData = await fetchRevenueData();
-
-  console.log(revenueData);
 
   return (
     <main className="w-full md:col-span-4">
@@ -24,7 +14,6 @@ export default async function RevenueChart() {
 
       <div className="rounded-xl bg-gray-100 p-4">
         <div className="bg-white">
-          {/* <Card> */}
           <BarChart
             data={revenueData}
             index="monthYear"
@@ -32,7 +21,6 @@ export default async function RevenueChart() {
             colors={["#3b82f6", "#6366f1", "#10b981"]}
             yAxisWidth={96}
           />
-          {/* </Card> */}
         </div>
         <div className="flex items-center pb-2 pt-6">
           <CalendarIcon className="h-5 w-5 text-gray-500" />
@@ -42,26 +30,3 @@ export default async function RevenueChart() {
     </main>
   );
 }
-
-const data = [
-  {
-    Weather: "Sunny",
-    Classmates: 10,
-  },
-  {
-    Weather: "Snowy",
-    Classmates: 5,
-  },
-  {
-    Weather: "Cloudy",
-    Classmates: 4,
-  },
-  {
-    Weather: "Rainy",
-    Classmates: 2,
-  },
-  {
-    Weather: "Foggy",
-    Classmates: 1,
-  },
-];

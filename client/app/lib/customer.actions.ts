@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { useRouter } from "next/router";
 import { cookies } from "next/headers";
 
 const CustomerFormSchema = z.object({
@@ -20,6 +19,7 @@ const CreateCustomer = CustomerFormSchema.omit({
 const UpdateCustomer = CustomerFormSchema.omit({
   _id: true,
   creation_date: true,
+  image: true
 });
 
 export type State = {
@@ -58,7 +58,6 @@ export async function createCustomer(
       message: "Missing Fields. Failed to Create Invoice.",
     };
   }
-  console.log("parsing success");
 
   const cookieStore = cookies();
   const accessToken = cookieStore.get("accessToken");
@@ -150,8 +149,57 @@ export async function deleteCustomer(id: string) {
     }
 
     console.log(response);
-    // revalidatePath("/dashboard/customer");
   } catch (error) {
     console.error("Error deleting customer:", error);
   }
+}
+
+export async function updateCustomer(
+  id: string,
+  prevState: State,
+  formData: FormData,
+
+): Promise<State> {
+
+  const validatedFields = UpdateCustomer.safeParse({
+    name: formData.get("name"),
+    image: formData.get("image"),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing Fields. Failed to Update Customer.",
+    };
+  }
+
+  const cookieStore = cookies();
+  const accessToken = cookieStore.get("accessToken");
+  try {
+    const response = await fetch(
+      `http://localhost:4000/dashboard/customer/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken?.value}`,
+        },
+        body: JSON.stringify(validatedFields.data),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to update customer");
+    }
+
+    console.log(response);
+  } catch (error) {
+    return {
+      message: "Database Error: Failed to Update Customer.",
+    };
+  }
+
+  // Revalidate the cache for the invoices page and redirect the user.
+  revalidatePath("/dashboard/customer");
+  redirect("/dashboard/customer");
 }

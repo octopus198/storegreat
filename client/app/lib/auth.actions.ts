@@ -44,7 +44,6 @@ export async function login(
       headers: {
         "Content-Type": "application/json",
       },
-      // body: JSON.stringify(Object.fromEntries(formData.entries())),
       body: JSON.stringify(validatedFields.data),
     });
     console.log(response);

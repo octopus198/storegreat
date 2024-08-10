@@ -1,5 +1,3 @@
-import { ThemePanel } from "@radix-ui/themes";
-import NavBar from "../components/NavBar";
 import Sidebar from "../ui/dashboard/Sidebar";
 
 export default function Layout({ children }: { children: React.ReactNode }) {

@@ -1,9 +1,7 @@
 "use server";
-import { formatCurrency } from "./utils";
 import { unstable_noStore as noStore } from "next/cache";
 import { cookies } from "next/headers";
-import { Order, OrdersTable } from "./definitions";
-// import { customFetch } from "../api/route";
+import { Order } from "./definitions";
 
 export async function fetchCardData() {
   noStore();
@@ -68,6 +66,7 @@ const monthNames = [
   "Nov",
   "Dec",
 ];
+
 export async function fetchRevenueData() {
   noStore();
   const cookieStore = cookies();

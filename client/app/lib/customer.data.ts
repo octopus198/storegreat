@@ -1,7 +1,6 @@
 "use server";
-import { Customer, CustomersTable } from "./definitions";
+import { Customer } from "./definitions";
 import { unstable_noStore as noStore } from "next/cache";
-import Router, { useRouter } from "next/router";
 import { cookies } from "next/headers";
 
 
@@ -87,8 +86,6 @@ export async function fetchCustomerItems(query: string) { // this is to fetch pa
   const accessToken = cookieStore.get('accessToken')
   try {
     if (!accessToken) {
-      console.log("we have access token here");
-      //   router.push("/login");
       return;
     }
 

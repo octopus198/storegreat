@@ -1,6 +1,5 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import Image from "next/image";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchLatestOrders } from "@/app/lib/dashboard.data";
 import CONSTANTS from "@/app/lib/constants";
@@ -26,7 +25,7 @@ export default async function LatestOrders() {
       </h2>
       <div className="flex grow flex-col justify-between rounded-xl bg-gray-100 p-4">
         <div className="bg-white px-6">
-          {latestOrders.map((order: Order, i: number) => {
+          {latestOrders && latestOrders.map((order: Order, i: number) => {
             return (
               <div
                 key={order._id}
@@ -40,18 +39,18 @@ export default async function LatestOrders() {
                 <div className="flex items-center">
                   <img
                     src={
-                      order.customerId.image
+                      order.customerId && order.customerId.image
                         ? order.customerId.image
                         : CONSTANTS.EMPTY_IMG
                     }
-                    alt={`${order.customerId.name}'s profile picture`}
+                    alt={`${order.customerId && order.customerId.name}'s profile picture`}
                     className="mr-4 rounded-full"
                     width={32}
                     height={32}
                   />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold md:text-base">
-                      {order.customerId.name}
+                      {order.customerId && order.customerId.name}
                     </p>
                   </div>
                 </div>

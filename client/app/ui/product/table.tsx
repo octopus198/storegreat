@@ -1,14 +1,11 @@
 import React from "react";
 import { Table } from "@radix-ui/themes";
 import Link from "next/link";
-import Image from "next/image";
 import { fetchFilteredProducts } from "@/app/lib/data";
 import { DeleteProduct, UpdateProduct } from "./buttons";
 import { ArrowTrendingDownIcon } from "@heroicons/react/24/outline";
 import CONSTANTS from "@/app/lib/constants"
 import { formatWithCommas } from "@/app/lib/utils";
-// const defaultImageURL =
-//   "https://res.cloudinary.com/dqw2psxim/image/upload/v1716641949/no_image_uyotz1.png";
 
 interface Product {
   _id: string;
@@ -82,7 +79,7 @@ export default async function ProductTable({
             <Table.ColumnHeaderCell>Product Name</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Stock Quantity</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Stock value</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Actions</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell style={{ textAlign: 'right' }}>Actions</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 

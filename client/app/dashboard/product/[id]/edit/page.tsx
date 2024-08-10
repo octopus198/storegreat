@@ -1,7 +1,4 @@
-// "use client"
-import Form from '@/app/ui/product/edit-form';
-import Breadcrumbs from '@/app/ui/product/breadcrumbs';
-import { Suspense } from 'react';
+import Form from '@/app/ui/product/edit-product';
 import { fetchProductById } from '@/app/lib/data';
 import Link from 'next/link';
 import { ArrowLeftIcon } from '@radix-ui/react-icons';

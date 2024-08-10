@@ -1,8 +1,6 @@
 "use server"
-import { Product, ProductsTable } from "./definitions";
+import { Product } from "./definitions";
 import { unstable_noStore as noStore } from "next/cache";
-import Router, { useRouter } from "next/router";
-import { number } from "zod";
 import { cookies } from 'next/headers'
 
 // this api return the product by id
@@ -48,8 +46,6 @@ export async function fetchFilteredProducts(
   const skip = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
     if (!accessToken) {
-      console.log("we have access token here");
-      //   router.push("/login");
       return;
     }
 
@@ -101,8 +97,6 @@ export async function fetchProductItems(query: string) {
     console.log(accessToken?.value)
   try {
     if (!accessToken) {
-      console.log("we have access token here");
-      //   router.push("/login");
       return;
     }
 
@@ -136,8 +130,6 @@ export async function fetchProducts() {
 
   try {
     if (!accessToken) {
-      console.log("we have access token here");
-      //   router.push("/login");
       return;
     }
 

@@ -148,13 +148,13 @@ async function checkProductNameExists(productName: string): Promise<boolean> {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken?.value}`,
         },
-        body: JSON.stringify({ productName }), // Ensure productName is sent as an object
+        body: JSON.stringify({ productName }), 
       }
     );
     console.log("the responses is ", response);
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error); // Throw an error with the error message from the server
+      throw new Error(errorData.error); 
     }
 
     const data: { exists: boolean } = await response.json();
@@ -247,7 +247,6 @@ export async function createProduct(
     const cookieStore = cookies();
     const accessToken = cookieStore.get("accessToken");
 
-    // Perform API call to create product
     const response = await fetch(
       "http://localhost:4000/dashboard/product/new",
       {
@@ -298,10 +297,8 @@ interface UploadResponse {
 }
 
 export async function uploadImage(files: File[]): Promise<UploadResponse> {
-  // console.log(files);
   const formData = new FormData();
   files.forEach((file) => formData.append("files", file));
-  // console.log(formData);
 
   // get access token
   const cookieStore = cookies();
@@ -318,8 +315,6 @@ export async function uploadImage(files: File[]): Promise<UploadResponse> {
         body: formData,
       }
     );
-    // console.log("it work!!!");
-    // console.log(response);
 
     if (!response.ok) {
       throw new Error(

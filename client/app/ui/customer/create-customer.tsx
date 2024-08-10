@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useState, ChangeEvent } from "react";
 import { createCustomer } from "@/app/lib/customer.actions";
 import { useFormState, useFormStatus } from "react-dom";
-import { Spinnaker } from "next/font/google";
 
 export default function Form() {
   const initialState = { message: null, errors: {} };
