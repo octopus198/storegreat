@@ -5,7 +5,7 @@ export const createCustomerController = async (req, res, next) => {
   try {
     const userID = req.user.id;
     const customerData = { userID, ...req.body };
-    console.log(customerData);
+  
     const newCustomer = await customerService.createCustomer(customerData);
     return res.json({
       message: CUSTOMER_MESSAGE.CREATE_CUSTOMER_SUCCESS,
@@ -22,7 +22,7 @@ export const getCustomerController = async (req, res, next) => {
   try {
     const userID = req.user.id;
     const customers = await customerService.getCustomers(userID);
-    console.log(customers)
+
     return res.json(customers);
   } catch (err) {
     throw new Error("Err getting customers", err);
@@ -53,13 +53,13 @@ export const updateCustomerDetailController = async (req, res, next) => {
     const userID = req.user.id;
     const customerID = req.params.id;
     const updatedData = req.body;
-    console.log(customerID);
+
     const updatedCustomer = await customerService.updateCustomerDetail(
       userID,
       customerID,
       updatedData
     );
-    console.log(updatedCustomer);
+ 
     if (!updatedCustomer) {
       return res.status(404).json({
         error: "Customer not found",

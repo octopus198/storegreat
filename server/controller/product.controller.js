@@ -31,7 +31,7 @@ export const createProductController = async (req, res, next) => {
   try {
     const userID = req.user.id;
     const productData = { userID, ...req.body };
-    console.log(productData);
+    
     const newProduct = await productService.createProduct(productData);
     return res.json({
       message: PRODUCT_MESSAGE.CREATE_PRODUCT_SUCCESS,
@@ -78,13 +78,13 @@ export const updateProductDetailController = async (req, res, next) => {
     const userID = req.user.id;
     const productID = req.params.id;
     const updatedData = req.body;
-    console.log(productID);
+
     const updatedProduct = await productService.updateProductDetail(
       userID,
       productID,
       updatedData
     );
-    console.log(updatedProduct);
+
     if (!updatedProduct) {
       return res.status(404).json({
         error: "Product not found",

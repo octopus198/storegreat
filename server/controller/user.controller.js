@@ -31,7 +31,7 @@ export const getMeController = async (req, res, next) => {
   try {
     const userID = req.user.id;
     const user = await userService.getMe(userID);
-    console.log(user)
+
     return res.json(user);
   } catch (err) {
     throw new Error("Err getting user", err);

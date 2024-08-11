@@ -22,7 +22,6 @@ class DashboardService {
           totalProductsSold += product.quantity;
         });
       });
-      console.log(totalProductsSold);
       return totalProductsSold;
     } catch (error) {
       console.error("Failed to get total products sold:", error.message);

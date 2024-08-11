@@ -2,7 +2,6 @@ import ProductModel from "../models/product.model.js";
 
 class ProductService {
   async createProduct(productData) {
-    console.log("product data ", productData);
     const product = await ProductModel.create(productData);
     return product;
   }
@@ -17,7 +16,6 @@ class ProductService {
       userID,
       _id: productID,
     });
-    console.log(productDetail);
     return productDetail;
   }
 
@@ -50,8 +48,13 @@ class ProductService {
     const product = await ProductModel.findOne({
       userID,
       productName,
+      deletedAt: null,
     });
-    return !!product;
+    if (product) {
+      return true;
+    }
+    return false;
+    // return !!product;
   }
 
   // check if product already exists for the update api (check for other documents)

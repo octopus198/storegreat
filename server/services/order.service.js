@@ -6,9 +6,10 @@ class OrderService {
     const order = await OrderModel.create(orderData);
     for (const productData of orderData.products) {
       const { productId, variantId, quantity } = productData;
+
       // find product
       const product = await ProductModel.findOne({ _id: productId });
-      console.log("product is", product);
+   
       if (!product) {
         throw new Error(`Product with ID ${productId} not found`);
       }
@@ -39,8 +40,6 @@ class OrderService {
         path: "products.productId",
         model: "product",
       });
-    console.log(orders);
-
     return orders;
   }
 
@@ -53,8 +52,6 @@ class OrderService {
         path: "products.productId",
         model: "product",
       });
-
-    console.log(orders);
     return orders;
   }
 
@@ -63,7 +60,6 @@ class OrderService {
       userID,
       _id: orderID,
     }).populate("customerId");
-    console.log(orderDetail);
     return orderDetail;
   }
 

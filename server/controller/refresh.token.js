@@ -1,10 +1,9 @@
-import RefreshTokenModel from "../models/refresh.token.model.js";
 import UserModel from "../models/user.model.js";
 import { generateRefreshToken } from "../utils/refresh.token.js";
 import { signToken } from "../utils/jwt.js";
 import { MESSAGE } from "../constants/message.js";
 import refreshTokenService from "../services/refresh.token.service.js";
-// issue new refresh token
+
 export const refreshTokenController = async (req, res) => {
   const { refresh_token } = req.body;
   try {
@@ -25,9 +24,7 @@ export const refreshTokenController = async (req, res) => {
     storedToken.token = new_refresh_token;
     storedToken.expireAt = new Date().setDate(new Date().getDate() + 7); // update the document of refresh in the database
     await storedToken.save();
-    console.log("did refresh token store in database?", storedToken)
-    console.log("what is new_refresh_token?", new_refresh_token)
-    // return res.json({ access_token, refresh_token: new_refresh_token });
+    
     return res.json({
       message: MESSAGE.GET_REFRESH_SUCCESS,
       tokens: {

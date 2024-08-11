@@ -9,15 +9,6 @@ export const createProductValidator = validator(
       productName: {
         exists: {
           errorMessage: PRODUCT_MESSAGE.PRODUCT_NAME_REQUIRED,
-        },
-        custom: {
-            options: async (value) => {
-                const product = await ProductModel.findOne({productName: value})
-                if (product) {
-                    throw new Error(PRODUCT_MESSAGE.PRODUCT_ALREADY_EXISTED);
-                }
-                return true;
-            } 
         }
       }
     },

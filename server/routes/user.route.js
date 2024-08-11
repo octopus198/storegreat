@@ -5,7 +5,6 @@ import {
 } from "../middleware/user.middleware.js";
 import {
   getMeController,
-  getUserController,
   loginController,
   registerController,
 } from "../controller/user.controller.js";

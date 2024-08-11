@@ -16,7 +16,7 @@ class CustomerService {
       userID,
       _id: customerID,
     });
-    console.log(customerDetail);
+    
     return customerDetail;
   }
 
