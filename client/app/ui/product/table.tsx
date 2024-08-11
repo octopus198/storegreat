@@ -1,10 +1,10 @@
 import React from "react";
 import { Table } from "@radix-ui/themes";
 import Link from "next/link";
-import { fetchFilteredProducts } from "@/app/lib/data";
+import { fetchFilteredProducts } from "@/app/lib/product.data";
 import { DeleteProduct, UpdateProduct } from "./buttons";
 import { ArrowTrendingDownIcon } from "@heroicons/react/24/outline";
-import CONSTANTS from "@/app/lib/constants"
+import CONSTANTS from "@/app/lib/constants";
 import { formatWithCommas } from "@/app/lib/utils";
 
 interface Product {
@@ -79,7 +79,9 @@ export default async function ProductTable({
             <Table.ColumnHeaderCell>Product Name</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Stock Quantity</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Stock value</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell style={{ textAlign: 'right' }}>Actions</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell style={{ textAlign: "right" }}>
+              Actions
+            </Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -88,6 +90,7 @@ export default async function ProductTable({
             <Table.Row key={product._id}>
               <Table.Cell>
                 <img
+                  style={{ objectFit: "contain" }}
                   className="w-10 h-10 object-cover rounded border-solid border-2 border-zinc-200"
                   src={
                     product.imageURL.length > 0
@@ -107,26 +110,44 @@ export default async function ProductTable({
               <Table.Cell
                 style={{
                   color:
-                    (product.hasVariants && getTotalStock(product) <= CONSTANTS.LOWSTOCK_THRESHOLD) ||
-                    (!product.hasVariants && product.stockQuantity <= CONSTANTS.LOWSTOCK_THRESHOLD)
+                    (product.hasVariants &&
+                      getTotalStock(product) <= CONSTANTS.LOWSTOCK_THRESHOLD) ||
+                    (!product.hasVariants &&
+                      product.stockQuantity <= CONSTANTS.LOWSTOCK_THRESHOLD)
                       ? "red"
                       : "inherit",
                 }}
               >
                 {product.hasVariants ? (
                   <div className="flex items-center">
-                    <span style={{ marginRight: 5 }}>{getTotalStock(product)}</span>
-                    {(product.hasVariants && getTotalStock(product) <= CONSTANTS.LOWSTOCK_THRESHOLD) ||
-                    (!product.hasVariants && product.stockQuantity <= CONSTANTS.LOWSTOCK_THRESHOLD) ? (
+                    <span style={{ marginRight: 5 }}>
+                      {getTotalStock(product)}
+                    </span>
+                    {(product.hasVariants &&
+                      getTotalStock(product) <= CONSTANTS.LOWSTOCK_THRESHOLD) ||
+                    (!product.hasVariants &&
+                      product.stockQuantity <= CONSTANTS.LOWSTOCK_THRESHOLD) ? (
                       <ArrowTrendingDownIcon className="w-5 text-red-500 mr-1" />
                     ) : null}
-                    in {getTotalVariants(product)} variants
+                    in {getTotalVariants(product)}{" "}
+                    {getTotalVariants(product) <= 1 ? "variant" : "variants"}
                   </div>
                 ) : (
-                  product.stockQuantity
+                  <div className="flex items-center">
+                    <span style={{ marginRight: 5 }}>
+                      {product.stockQuantity}
+                    </span>
+                    {product.stockQuantity <= CONSTANTS.LOWSTOCK_THRESHOLD ? (
+                      <ArrowTrendingDownIcon className="w-5 text-red-500 mr-1" />
+                    ) : null}
+                  </div>
                 )}
               </Table.Cell>
-              <Table.Cell>{product.hasVariants ? formatWithCommas(getTotalStockValue(product)) : formatWithCommas(product.COGS * product.stockQuantity)}</Table.Cell>
+              <Table.Cell>
+                {product.hasVariants
+                  ? getTotalStockValue(product).toFixed(2)
+                  : (product.COGS * product.stockQuantity).toFixed(2)}
+              </Table.Cell>
               <Table.Cell>
                 <div className="flex justify-end gap-3">
                   <UpdateProduct id={product._id} />

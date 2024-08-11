@@ -36,7 +36,6 @@ export async function fetchOrderById(id:string) {
       throw new Error("Failed to get product details");
     }
     const orderDetail = await response.json();
-    console.log(orderDetail)
     
     return orderDetail;
   } catch (err) {
@@ -63,7 +62,7 @@ export async function fetchFilteredOrders(
     });
 
     const responseData = await response.json();
-    console.log(responseData);
+   
     let filteredOrders = responseData.filter(
       (order: Order) => !order.deletedAt
     );
@@ -105,7 +104,6 @@ export async function fetchOrderItems(query: string) {
       },
     });
     const responseData = await response.json();
-    console.log("fetchOrderItems",responseData);
     const filteredOrders = responseData.filter(
       (order: Order) => !order.deletedAt
     );

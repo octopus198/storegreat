@@ -1,13 +1,5 @@
 "use client";
-
-import {
-  AtSymbolIcon,
-  KeyIcon,
-  ExclamationCircleIcon,
-} from "@heroicons/react/24/outline";
-import { ArrowRightIcon } from "@heroicons/react/20/solid";
 import { useFormState, useFormStatus } from "react-dom";
-// import { authenticate } from "@/app/lib/actions";
 import {
   Card,
   CardHeader,
@@ -25,6 +17,7 @@ import { Spinner } from "@radix-ui/themes";
 export default function LoginForm() {
   const initialState = { message: null, errors: {} };
   const [state, dispatch] = useFormState(login, initialState);
+
   return (
     <form action={dispatch}>
       <Card className="mx-auto max-w-sm">
@@ -32,6 +25,9 @@ export default function LoginForm() {
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
             Enter your email below to login to your account
+          </CardDescription>
+          <CardDescription className="text-red-600">
+            Or you can use test account: test@gmail.com (password: 12345678)
           </CardDescription>
         </CardHeader>
         <CardContent>

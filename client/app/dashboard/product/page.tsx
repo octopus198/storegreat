@@ -1,6 +1,6 @@
 import Pagination from "@/app/ui/pagination";
 import ProductTable from "@/app/ui/product/table";
-import { fetchProductItems } from "@/app/lib/data";
+import { fetchProductItems } from "@/app/lib/product.data";
 import { CreateProduct } from "@/app/ui/product/buttons";
 import Search from "@/app/ui/search";
 import { Suspense } from 'react';

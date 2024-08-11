@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { z } from "zod";
+
 const FormSchema = z.object({
   _id: z.string(),
   email: z.string().trim().email({ message: "Invalid email address" }),
@@ -28,7 +29,6 @@ export async function login(
     email: formData.get("email"),
     password: formData.get("password"),
   });
-  console.log("validatedFields", validatedFields);
 
   if (!validatedFields.success) {
     console.log("flatten errors", validatedFields.error.flatten().fieldErrors);
@@ -46,7 +46,6 @@ export async function login(
       },
       body: JSON.stringify(validatedFields.data),
     });
-    console.log(response);
 
     if (!response.ok) {
       throw new Error("Fail to login");
@@ -59,14 +58,11 @@ export async function login(
       httpOnly: true,
     });
 
-    console.log("did this work?")
     cookies().set({
       name: "refreshToken",
       value: responseData.tokens.refresh_token,
       httpOnly: true,
     });
-
-    console.log("Login successfully", responseData);
   } catch (error) {
     return {
       message: "Database Error: Failed to login.",

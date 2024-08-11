@@ -6,10 +6,10 @@ import { cookies } from 'next/headers'
 // this api return the product by id
 export async function fetchProductById(id:string) {
   noStore();
+
     // get access token
     const cookieStore = cookies()
     const accessToken = cookieStore.get('accessToken')
-    console.log(accessToken)
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/dashboard/product/${id}`,
@@ -26,7 +26,6 @@ export async function fetchProductById(id:string) {
       throw new Error("Failed to get product details");
     }
     const productDetail = await response.json();
-    console.log(productDetail)    
     return productDetail;
   } catch (err) {
     console.log(err);
@@ -58,14 +57,13 @@ export async function fetchFilteredProducts(
     });
 
     const responseData = await response.json();
-    console.log(responseData);
+
     let filteredProducts = responseData.filter(
       (product: Product) => !product.deletedAt
     );
 
     filteredProducts = filteredProducts.sort((a: Product, b: Product) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());
-    console.log("Get products successfully", responseData);
-    console.log("filtered products", filteredProducts);
+   
     if (query) {
       const queriedProducts = filteredProducts.filter((product: Product) =>
         product.productName.toLowerCase().includes(query.toLowerCase())
@@ -91,10 +89,10 @@ export async function fetchFilteredProducts(
 // this api return the number of available products
 export async function fetchProductItems(query: string) {
   noStore();
+
     // get access token
     const cookieStore = cookies()
     const accessToken = cookieStore.get('accessToken')
-    console.log(accessToken?.value)
   try {
     if (!accessToken) {
       return;
@@ -108,7 +106,7 @@ export async function fetchProductItems(query: string) {
       },
     });
     const responseData = await response.json();
-    console.log(responseData);
+
     const filteredProducts = responseData.filter(
       (product: Product) => !product.deletedAt
     );
@@ -141,7 +139,6 @@ export async function fetchProducts() {
       },
     });
     const responseData = await response.json();
-    console.log(responseData);
     const filteredProducts = responseData.filter(
       (product: Product) => !product.deletedAt
     );

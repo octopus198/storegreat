@@ -246,7 +246,7 @@ export default function Form({
           </Button>
         </div>
         <p className="text-zinc-700 font-semibold">
-          Total Amount: {totalAmount}
+          Total Amount: {totalAmount.toFixed(2)}
         </p>
         <TotalQuantity control={control} />
         <div id="customer-error" aria-live="polite" aria-atomic="true">

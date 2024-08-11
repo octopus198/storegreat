@@ -1,6 +1,6 @@
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { deleteProduct } from '@/app/lib/actions';
+import { deleteProduct } from '@/app/lib/product.actions';
 
 export function CreateProduct() {
   return (

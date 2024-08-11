@@ -3,7 +3,7 @@ import { TextField, TextArea, Grid, Box, Spinner } from "@radix-ui/themes";
 import { useFormState, useFormStatus } from "react-dom";
 import { Button } from "../buttons";
 import Link from "next/link";
-import { createProduct, updateProduct } from "@/app/lib/actions";
+import { createProduct, updateProduct } from "@/app/lib/product.actions";
 import { useWatch, Control, useForm, useFieldArray } from "react-hook-form";
 import { useState } from "react";
 
@@ -89,7 +89,7 @@ export default function Form({ productDetail }: { productDetail: Product }) {
             htmlFor="productName"
             className="block text-zinc-700 font-semibold text-normal"
           >
-            Product name
+            Product name <span style={{color: "red"}}>*</span>
           </label>
           <TextField.Root
             id="productName"
@@ -146,7 +146,7 @@ export default function Form({ productDetail }: { productDetail: Product }) {
             htmlFor="variant"
             className="block text-zinc-700 font-semibold text-normal"
           >
-            Product Variants
+            Product Variants (optional)
           </label>
           {fields.map((field, index) => (
             <div key={field.id} className="flex space-x-4">
@@ -166,12 +166,11 @@ export default function Form({ productDetail }: { productDetail: Product }) {
                 <input
                   type="number"
                   placeholder="Variant Price"
-                  // defaultValue={field.variantPrice}
+                  step="0.01"
                   {...register(`variants.${index}.variantPrice`, {
                     required: true,
                     valueAsNumber: true,
                   })}
-                  // onChange={(e) => handleUpdate(index, 'variantPrice', e.target.value)}
                   className="block w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-inset focus:ring-indigo-600"
                 />
               </label>
@@ -179,22 +178,20 @@ export default function Form({ productDetail }: { productDetail: Product }) {
                 Variant Quantity
                 <input
                   type="number"
-                  // defaultValue={field.variantQuantity}
                   placeholder="Variant Quantity"
                   {...register(`variants.${index}.variantQuantity`, {
                     required: true,
                     valueAsNumber: true,
                   })}
-                  // onChange={(e) => handleUpdate(index, 'variantQuantity', e.target.value)}
                   className="block w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-inset focus:ring-indigo-600"
                 />
               </label>
               <label htmlFor="" className="mb-2">
                 Variant Cost
                 <input
-                  // defaultValue={field.variantCOGS}
                   type="number"
                   placeholder="Variant Cost"
+                  step="0.01"
                   {...register(`variants.${index}.variantCOGS`, {
                     required: true,
                     valueAsNumber: true,
@@ -226,13 +223,14 @@ export default function Form({ productDetail }: { productDetail: Product }) {
           </Button>
         </div>
         <TotalQuantity control={control} />
-      </div>
-      {state.errors?.variants &&
+        {state.errors?.variants &&
         state.errors.variants.map((error: string) => (
           <p className="mt-2 text-sm text-red-500" key={error}>
             {error}
           </p>
         ))}
+      </div>
+    
 
       {/* IMAGE SECTION */}
       <div className="bg-white px-10 py-10 rounded-lg shadow-md space-y-4">
@@ -243,11 +241,11 @@ export default function Form({ productDetail }: { productDetail: Product }) {
           >
             Product Image
           </label>
-          
           <div className="flex space-x-4 overflow-x-auto">
             {productDetail.imageURL &&
               productDetail.imageURL.map((url, index) => (
                 <img
+                  style={{ objectFit: "contain" }}
                   key={index}
                   src={url}
                   alt={`Product Image ${index + 1}`}
@@ -274,7 +272,14 @@ export default function Form({ productDetail }: { productDetail: Product }) {
             type="number"
             className="block border-solid border-indigo-600 w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           />
+          {state.errors?.stockQuantity &&
+            state.errors.stockQuantity.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500" key={error}>
+                {error}
+              </p>
+            ))}
         </div>
+
         <div className="space-y-2">
           <label
             htmlFor="retailPrice"
@@ -287,8 +292,15 @@ export default function Form({ productDetail }: { productDetail: Product }) {
             id="retailPrice"
             name="retailPrice"
             type="number"
+            step="0.01"
             className="block border-solid border-indigo-600 w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           />
+          {state.errors?.retailPrice &&
+            state.errors.retailPrice.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500" key={error}>
+                {error}
+              </p>
+            ))}
         </div>
 
         <div className="space-y-2">
@@ -303,9 +315,16 @@ export default function Form({ productDetail }: { productDetail: Product }) {
             id="COGS"
             name="COGS"
             type="number"
+            step="0.01"
             className="block border-solid border-indigo-600 w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           />
         </div>
+        {state.errors?.COGS &&
+          state.errors.COGS.map((error: string) => (
+            <p className="mt-2 text-sm text-red-500" key={error}>
+              {error}
+            </p>
+          ))}
       </div>
 
       <div className="bg-white px-10 py-10 rounded-lg shadow-md space-y-4">
@@ -317,11 +336,7 @@ export default function Form({ productDetail }: { productDetail: Product }) {
             Warehouse enter date
           </label>
           <input
-            defaultValue={
-              new Date(productDetail.warehouse_enter_date)
-                .toISOString()
-                .split("T")[0]
-            }
+            defaultValue={productDetail.warehouse_enter_date ? new Date(productDetail.warehouse_enter_date).toISOString().split("T")[0] : undefined}
             id="warehouse_enter_date"
             name="warehouse_enter_date"
             type="date"
@@ -336,9 +351,7 @@ export default function Form({ productDetail }: { productDetail: Product }) {
             Expiry date
           </label>
           <input
-            defaultValue={
-              new Date(productDetail.exp_date).toISOString().split("T")[0]
-            }
+            defaultValue={productDetail.exp_date ? new Date(productDetail.exp_date).toISOString().split("T")[0] : undefined}
             id="exp_date"
             name="exp_date"
             type="date"
@@ -353,7 +366,7 @@ export default function Form({ productDetail }: { productDetail: Product }) {
         >
           Cancel
         </Link>
-        <UpdateProductButton/>
+        <UpdateProductButton />
       </div>
     </form>
   );
@@ -367,7 +380,7 @@ function UpdateProductButton() {
       className="bg-indigo-600 hover:bg-indigo-400"
       aria-disabled={pending}
     >
-      {pending? <Spinner />: " "} Update Product
+      {pending ? <Spinner /> : " "} Update Product
     </Button>
   );
 }

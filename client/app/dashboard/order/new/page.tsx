@@ -1,6 +1,6 @@
 import Form from "@/app/ui/order/create-order";
 import { fetchCustomers } from "@/app/lib/customer.data";
-import { fetchProducts } from "@/app/lib/data";
+import { fetchProducts } from "@/app/lib/product.data";
 import Link from "next/link";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 

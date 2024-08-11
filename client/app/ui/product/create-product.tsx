@@ -4,11 +4,9 @@ import { TextField, TextArea, Grid, Box, Spinner } from "@radix-ui/themes";
 import { useFormState, useFormStatus } from "react-dom";
 import { Button } from "../buttons";
 import Link from "next/link";
-import { createProduct, State, uploadImage } from "@/app/lib/actions";
+import { createProduct, State, uploadImage } from "@/app/lib/product.actions";
 import { useState, ChangeEvent } from "react";
-import { Uploader } from "rsuite";
 import "rsuite/Uploader/styles/index.css";
-import { red } from "tailwindcss/colors";
 
 type FormValues = {
   variants: {
@@ -160,6 +158,7 @@ export default function Form() {
           >
             Product Image
           </label>
+          <p>You can upload up to 5 images in one go.</p>
           <input
             id="image"
             name="image"
@@ -171,6 +170,7 @@ export default function Form() {
           <div className="flex space-x-4 overflow-x-auto">
             {images.map((src, index) => (
               <img
+                style={{ objectFit: "contain" }}
                 key={index}
                 src={src}
                 alt={`Uploaded ${index}`}
@@ -188,7 +188,7 @@ export default function Form() {
             htmlFor="variant"
             className="block text-zinc-700 font-semibold text-normal"
           >
-            Product Variants
+            Product Variants (optional)
           </label>
           {fields.map((field, index) => (
             <div key={field.id} className="flex space-x-4">
@@ -265,13 +265,13 @@ export default function Form() {
           </Button>
         </div>
         <TotalQuantity control={control} />
+        {state.errors?.variants &&
+          state.errors.variants.map((error: string) => (
+            <p className="mt-2 text-sm text-red-500" key={error}>
+              {error}
+            </p>
+          ))}
       </div>
-      {state.errors?.variants &&
-        state.errors.variants.map((error: string) => (
-          <p className="mt-2 text-sm text-red-500" key={error}>
-            {error}
-          </p>
-        ))}
 
       {/* QUANTITY SECTION */}
       <div className="bg-white px-10 py-10 rounded-lg shadow-md space-y-4">
@@ -290,9 +290,14 @@ export default function Form() {
             defaultValue={0}
             className="block border-solid border-indigo-600 w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           />
+          {state.errors?.stockQuantity &&
+            state.errors.stockQuantity.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500" key={error}>
+                {error}
+              </p>
+            ))}
         </div>
-        <div id="quantity-error" aria-live="polite" aria-atomic="true">
-        </div>
+
         <div className="space-y-2">
           <label
             htmlFor="retailPrice"
@@ -304,9 +309,16 @@ export default function Form() {
             id="retailPrice"
             name="retailPrice"
             type="number"
+            step="0.01"
             defaultValue={0}
             className="block border-solid border-indigo-600 w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           />
+          {state.errors?.retailPrice &&
+            state.errors.retailPrice.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500" key={error}>
+                {error}
+              </p>
+            ))}
         </div>
 
         <div className="space-y-2">
@@ -320,10 +332,17 @@ export default function Form() {
             id="COGS"
             name="COGS"
             type="number"
+            step="0.01"
             defaultValue={0}
             className="block border-solid border-indigo-600 w-full rounded-md py-1.5 pl-4 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           />
         </div>
+        {state.errors?.COGS &&
+            state.errors.COGS.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500" key={error}>
+                {error}
+              </p>
+            ))}
       </div>
 
       <div className="bg-white px-10 py-10 rounded-lg shadow-md space-y-4">

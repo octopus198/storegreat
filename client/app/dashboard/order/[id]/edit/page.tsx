@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { fetchOrderById } from "@/app/lib/order.data";
 import { fetchCustomers } from "@/app/lib/customer.data";
-import { fetchProducts } from "@/app/lib/data";
+import { fetchProducts } from "@/app/lib/product.data";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const id = params.id;

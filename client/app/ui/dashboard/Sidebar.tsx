@@ -1,8 +1,7 @@
 import Link from "next/link";
 import React from "react";
-import { BuildingStorefrontIcon, PowerIcon, UserCircleIcon } from "@heroicons/react/24/outline";
+import { PowerIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 import NavLinks from "./Navlinks";
-import Logo from "../logo";
 import { signout } from "@/app/lib/auth.actions";
 import { redirect } from "next/navigation";
 import { lusitana } from "../fonts";

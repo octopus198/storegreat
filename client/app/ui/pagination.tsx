@@ -6,11 +6,7 @@ import {
   DoubleArrowRightIcon,
 } from "@radix-ui/react-icons";
 import { Button, Flex, Text } from "@radix-ui/themes";
-import {
-  useRouter,
-  useSearchParams,
-  useSelectedLayoutSegment,
-} from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 
 interface Props {
@@ -22,11 +18,9 @@ const Pagination = ({ itemCount, pageSize, currentPage }: Props) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pageCount = Math.ceil(itemCount / pageSize);
-  console.log("itemcount",itemCount)
-  console.log("pagesize",pageSize)
   if (pageCount <= 1) {
-    console.log("page count is one???")
-    return null;} 
+    return null;
+  }
   const changePage = (page: Number) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", page.toString());

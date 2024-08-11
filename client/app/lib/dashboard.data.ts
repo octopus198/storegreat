@@ -26,7 +26,6 @@ export async function fetchCardData() {
     );
 
     const responses = await Promise.all(requests);
-    console.log(responses);
 
     const [totalSalesData, totalCostData, productSoldData] = responses;
 
@@ -116,9 +115,6 @@ export async function fetchRevenueData() {
       }
     );
 
-    console.log(responseData.revenueChartData);
-    console.log(formattedData);
-
     return formattedData;
   } catch (error) {
     console.error("Database Error:", error);
@@ -142,7 +138,6 @@ export async function fetchLatestOrders() {
       }
     );
     const responseData = await response.json();
-    console.log("fetchOrderItems", responseData);
     const filteredOrders = responseData.filter(
       (order: Order) => !order.deletedAt
     );
@@ -167,7 +162,7 @@ export async function fetchUser() {
       },
     });
     const user = await response.json();
-    console.log("get user", user);
+
     return user;
   } catch (error) {
     console.error("Database Error:", error);

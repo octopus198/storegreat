@@ -1,5 +1,5 @@
 import Form from '@/app/ui/product/edit-product';
-import { fetchProductById } from '@/app/lib/data';
+import { fetchProductById } from '@/app/lib/product.data';
 import Link from 'next/link';
 import { ArrowLeftIcon } from '@radix-ui/react-icons';
 

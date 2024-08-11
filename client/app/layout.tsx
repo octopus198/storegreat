@@ -3,10 +3,7 @@ import { Inter } from "next/font/google";
 import "@radix-ui/themes/styles.css";
 import "./theme-config.css";
 import "./globals.css";
-import { Theme, ThemePanel } from "@radix-ui/themes";
-import NavBar from "./components/NavBar";
-import Sidebar from "./ui/dashboard/Sidebar";
-import { AppProvider } from "./AppProvider";
+import { Theme } from "@radix-ui/themes";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 

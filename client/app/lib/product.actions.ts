@@ -24,33 +24,36 @@ const FormSchema = z.object({
   productDescription: z.string().optional().nullable(),
   stockQuantity: z.coerce
     .number()
-    .gte(0, { message: "Please enter amount greater than 0" })
+    .gte(0, { message: "Please enter quantity greater than or equal 0" })
     .optional()
     .nullable(),
   retailPrice: z.coerce
     .number()
-    .gte(0, { message: "Please enter amount greater than 0" })
+    .gte(0, { message: "Please enter amount greater than or equal 0" })
     .optional()
     .nullable(),
   COGS: z.coerce
     .number()
-    .gte(0, { message: "Please enter amount greater than 0" })
+    .gte(0, { message: "Please enter amount greater than or equal 0" })
     .optional()
     .nullable(),
   hasVariants: z.boolean(),
   variants: z
     .array(
       z.object({
-        variantName: z.string(),
+        variantName: z
+          .string()
+          .trim()
+          .min(1, { message: "Variant name is required" }),
         variantPrice: z.coerce
           .number()
-          .gt(0, { message: "Please enter price greater than 0" }),
+          .gte(0, { message: "Please enter price greater than or equal 0" }),
         variantQuantity: z.coerce
           .number()
-          .gt(0, { message: "Please enter quantity greater than 0" }),
+          .gte(0, { message: "Please enter quantity greater than or equal 0" }),
         variantCOGS: z.coerce
           .number()
-          .gt(0, { message: "Please enter cost greater than 0" }),
+          .gte(0, { message: "Please enter cost greater than or equal 0" }),
       })
     )
     .optional(),
@@ -71,33 +74,36 @@ const FormUpdateSchema = z.object({
   productDescription: z.string().optional().nullable(),
   stockQuantity: z.coerce
     .number()
-    .gte(0, { message: "Please enter amount greater than 0" })
+    .gte(0, { message: "Please enter quantity greater than or equal 0" })
     .optional()
     .nullable(),
   retailPrice: z.coerce
     .number()
-    .gte(0, { message: "Please enter amount greater than 0" })
+    .gte(0, { message: "Please enter amount greater than or equal 0" })
     .optional()
     .nullable(),
   COGS: z.coerce
     .number()
-    .gte(0, { message: "Please enter amount greater than 0" })
+    .gte(0, { message: "Please enter amount greater than or equal 0" })
     .optional()
     .nullable(),
   hasVariants: z.boolean(),
   variants: z
     .array(
       z.object({
-        variantName: z.string(),
+        variantName: z
+          .string()
+          .trim()
+          .min(1, { message: "Variant name is required" }),
         variantPrice: z.coerce
           .number()
-          .gt(0, { message: "Please enter price greater than 0" }),
+          .gte(0, { message: "Please enter price greater than 0" }),
         variantQuantity: z.coerce
           .number()
-          .gt(0, { message: "Please enter quantity greater than 0" }),
+          .gte(0, { message: "Please enter quantity greater than 0" }),
         variantCOGS: z.coerce
           .number()
-          .gt(0, { message: "Please enter cost greater than 0" }),
+          .gte(0, { message: "Please enter cost greater than 0" }),
       })
     )
     .optional(),
@@ -148,13 +154,13 @@ async function checkProductNameExists(productName: string): Promise<boolean> {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken?.value}`,
         },
-        body: JSON.stringify({ productName }), 
+        body: JSON.stringify({ productName }),
       }
     );
-    console.log("the responses is ", response);
+    
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error); 
+      throw new Error(errorData.error);
     }
 
     const data: { exists: boolean } = await response.json();
@@ -175,16 +181,13 @@ export async function createProduct(
   // get images
   let imageUrls: string[] = [];
   const imageFiles = formData.getAll("image") as File[];
-  console.log(" imageFiles", imageFiles);
+ 
   const validImageFiles = imageFiles.filter((file) => file.size > 0);
 
-  console.log("valid imageFiles", validImageFiles);
-  console.log("imageFiles length", imageFiles.length);
   if (validImageFiles.length !== 0) {
     const uploadResponse = await uploadImage(imageFiles);
     imageUrls = uploadResponse.files.map((file) => file.secure_url);
   }
-  console.log(imageUrls);
 
   // get variants data
   const variantsData: {
@@ -241,7 +244,6 @@ export async function createProduct(
     });
 
     isValidationSuccess = true;
-    console.log("Parsing success");
 
     // get access token
     const cookieStore = cookies();
@@ -264,8 +266,6 @@ export async function createProduct(
     }
 
     const responseData = await response.json();
-    console.log("Product created successfully", responseData);
-
     return { message: "Product created successfully" };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -336,9 +336,9 @@ export async function updateProduct(
   prevState: State,
   formData: FormData
 ): Promise<State> {
+
   // get images
   const imageFiles = formData.getAll("image") as File[];
-  console.log("imageFiles in update", imageFiles);
 
   const variantsData: {
     variantName: string;
@@ -352,7 +352,12 @@ export async function updateProduct(
       const field = parseInt(index);
       const prop = key.replace(`variants.${field}.`, "");
       if (!variantsData[field]) {
-        variantsData[field] = { variantName: "", variantPrice: "", variantQuantity: "", variantCOGS: "" };
+        variantsData[field] = {
+          variantName: "",
+          variantPrice: "",
+          variantQuantity: "",
+          variantCOGS: "",
+        };
       }
       if (
         prop === "variantName" ||
@@ -364,7 +369,6 @@ export async function updateProduct(
       }
     }
   }
-  console.log("variants data in update", variantsData);
 
   const variants = variantsData.map((variant) => ({
     variantName: variant.variantName,
@@ -372,8 +376,6 @@ export async function updateProduct(
     variantQuantity: parseInt(variant.variantQuantity || "0"),
     variantCOGS: parseFloat(variant.variantCOGS),
   }));
-
-  console.log("variants in update", variants);
 
   let isValidationSuccess = false;
   try {
@@ -391,7 +393,6 @@ export async function updateProduct(
     });
 
     isValidationSuccess = true;
-    console.log("Parsing success");
 
     // get access token
     const cookieStore = cookies();
@@ -415,7 +416,6 @@ export async function updateProduct(
     }
 
     const responseData = await response.json();
-    console.log("Product updated successfully", responseData);
 
     return { message: "Product updated successfully" };
   } catch (error) {
@@ -461,7 +461,6 @@ export async function deleteProduct(id: string) {
       throw new Error("Fail to delete product");
     }
 
-    console.log("the delete product response is",response);
     revalidatePath("/dashboard/product");
   } catch (error) {
     console.error("Error deleting product:", error);

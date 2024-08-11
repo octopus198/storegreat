@@ -87,8 +87,7 @@ export async function createOrder(
   const products = productsData.map((product) => {
     const { variantId, productId } = product;
     const [parsedProductId, parsedVariantId] = variantId.split("|");
-    console.log("parsed product id is", parsedProductId);
-    console.log("parsed variant id is", parsedVariantId);
+    
     return {
       productId: parsedProductId,
       variantId: parsedVariantId ? parsedVariantId : null,
@@ -105,10 +104,7 @@ export async function createOrder(
     products: products,
   });
 
-  console.log("validatedFields data", validatedFields.data);
-
   if (!validatedFields.success) {
-    console.log("not success");
     console.log("flatten errors", validatedFields.error.flatten().fieldErrors);
     return {
       errors: validatedFields.error.flatten().fieldErrors,
@@ -116,7 +112,6 @@ export async function createOrder(
     };
   }
 
-  console.log("order data is ", validatedFields.data);
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/order/new`, {
       method: "POST",
@@ -126,14 +121,12 @@ export async function createOrder(
       },
       body: JSON.stringify(validatedFields.data),
     });
-    console.log(response);
 
     if (!response.ok) {
       throw new Error("Failed to create new order");
     }
 
     const responseData = await response.json();
-    console.log("Order created successfully", responseData);
   } catch (error) {
     return {
       message: "Database Error: Failed to Create Product.",
@@ -182,8 +175,7 @@ export async function updateOrder(
   const products = productsData.map((product) => {
     const { variantId, productId } = product;
     const [parsedProductId, parsedVariantId] = variantId.split("|");
-    console.log("parsed product id is", parsedProductId);
-    console.log("parsed variant id is", parsedVariantId);
+    
     return {
       productId: parsedProductId,
       variantId: parsedVariantId ? parsedVariantId : null,
@@ -200,10 +192,7 @@ export async function updateOrder(
     products: products,
   });
 
-  console.log("validatedFields data", validatedFields.data);
-
   if (!validatedFields.success) {
-    console.log("not success");
     console.log("flatten errors", validatedFields.error.flatten().fieldErrors);
     return {
       errors: validatedFields.error.flatten().fieldErrors,
@@ -211,7 +200,6 @@ export async function updateOrder(
     };
   }
 
-  console.log("order data is ", validatedFields.data);
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/dashboard/order/${id}`,
@@ -224,14 +212,13 @@ export async function updateOrder(
         body: JSON.stringify(validatedFields.data),
       }
     );
-    console.log(response);
 
     if (!response.ok) {
       throw new Error("Failed to create new order");
     }
 
     const responseData = await response.json();
-    console.log("Order created successfully", responseData);
+  
   } catch (error) {
     return {
       message: "Database Error: Failed to Create Product.",
@@ -262,7 +249,6 @@ export async function deleteOrder(id: string) {
       throw new Error("Faile to delete order");
     }
 
-    console.log(response);
     revalidatePath("/dashboard/order");
   } catch (error) {
     console.error("Error deleting order:", error);

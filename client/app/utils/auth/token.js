@@ -4,7 +4,6 @@ export function setToken(access_token, refresh_token) {
 }
 
 export async function getNewToken(refreshToken) {
-  console.log("passed refresh token", refreshToken)
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/refresh-token`, {
       method: "POST",
@@ -14,7 +13,6 @@ export async function getNewToken(refreshToken) {
       body: JSON.stringify({ refresh_token: refreshToken }),
     });
 
-    console.log("refesh token response", response)
     if (!response.ok) {
       throw new Error("Failed to get new access token");
     }

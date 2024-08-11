@@ -24,7 +24,6 @@ export async function fetchCustomerById(id:string) {
       throw new Error("Failed to get customer details");
     }
     const customerDetail = await response.json();
-    console.log(customerDetail)
     return customerDetail;
   } catch (err) {
     console.log(err);
@@ -50,14 +49,13 @@ export async function fetchFilteredCustomers(
     });
 
     const responseData = await response.json();
-    console.log(responseData);
+
     let filteredCustomers = responseData.filter(
       (customer: Customer) => !customer.deletedAt
     );
 
     filteredCustomers = filteredCustomers.sort((a: Customer, b: Customer) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());
-    console.log("Get customers successfully", responseData);
-    console.log("filtered customers", filteredCustomers);
+  
     if (query) {
       const queriedProducts = filteredCustomers.filter((customer: Customer) =>
         customer.name.toLowerCase().includes(query.toLowerCase())
@@ -97,7 +95,7 @@ export async function fetchCustomerItems(query: string) { // this is to fetch pa
       },
     });
     const responseData = await response.json();
-    console.log(responseData);
+    
     const filteredCustomers = responseData.filter(
       (customer: Customer) => !customer.deletedAt
     );
@@ -122,7 +120,6 @@ export async function fetchCustomers() {
       },
     });
     const responseData = await response.json();
-    console.log(responseData);
     let filteredCustomers = responseData.filter(
       (customer: Customer) => !customer.deletedAt
     );
