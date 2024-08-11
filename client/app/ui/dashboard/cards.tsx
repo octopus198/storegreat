@@ -17,13 +17,9 @@ export default async function CardWrapper() {
 
   return (
     <>
-      <Card title="Sales" value={formatWithCommas(totalSales)} type="sales" />
-      <Card title="Costs" value={formatWithCommas(totalCost)} type="costs" />
-      <Card
-        title="Profit"
-        value={formatWithCommas(totalProfit)}
-        type="profit"
-      />
+      <Card title="Sales" value={totalSales.toFixed(2)} type="sales" />
+      <Card title="Costs" value={totalCost.toFixed(2)} type="costs" />
+      <Card title="Profit" value={totalProfit.toFixed(2)} type="profit" />
       <Card title="Total Products Sold" value={productSold} type="product" />
     </>
   );
