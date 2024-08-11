@@ -56,6 +56,13 @@ const RegisterPage = () => {
   });
 
   const onSubmit = async (data: FormData) => {
+    
+    const returnData = {
+      email: data.email,
+      username: data.username,
+      password: data.password,
+      confirm_password: data.confirmPassword,
+    };
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/register`,
@@ -64,10 +71,10 @@ const RegisterPage = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(returnData),
         }
       );
-
+      console.log(response)
       if (!response.ok) {
         throw new Error("Failed to create user");
       }
