@@ -14,12 +14,9 @@ const app = express();
 // const PORT = 3000;
 
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: process.env.CORS_ORIGIN 
 }));
 
-app.use(cors(corsOptions));
 
 app.use(express.json());
 
